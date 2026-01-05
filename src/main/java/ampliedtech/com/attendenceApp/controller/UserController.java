@@ -1,17 +1,14 @@
 package ampliedtech.com.attendenceApp.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.dto.RegisterRequest;
+import ampliedtech.com.attendenceApp.dto.UserResponse;
 import ampliedtech.com.attendenceApp.dto.LoginRequest;
 import ampliedtech.com.attendenceApp.dto.AuthResponse;
 import ampliedtech.com.attendenceApp.service.UserService;
@@ -46,10 +43,10 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<PagedModel<User>> getCurrentUser(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-                Page<User> userPage= userService.getCurrentUser(page, size);
-        return ResponseEntity.ok(new PagedModel<>(userPage));
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        UserResponse user = userService.getCurrentUser();
+        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(),
+                user.getName(), user.getRole());
+        return ResponseEntity.ok(userResponse);
     }
 }

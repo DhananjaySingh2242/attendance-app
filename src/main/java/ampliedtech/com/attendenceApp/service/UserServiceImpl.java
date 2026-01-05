@@ -4,11 +4,13 @@ import ampliedtech.com.attendenceApp.dto.AuthResponse;
 import ampliedtech.com.attendenceApp.dto.LoginRequest;
 import ampliedtech.com.attendenceApp.dto.RegisterRequest;
 import ampliedtech.com.attendenceApp.dto.UpdateRequest;
+import ampliedtech.com.attendenceApp.dto.UserResponse;
 import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.configuration.JwtUtil;
 
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties.Apiversion.Use;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,10 +104,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> getCurrentUser(int page, int size) {
+    public UserResponse getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Pageable pageable = PageRequest.of(page, size, Sort.by("email").descending());
-        return userRepository.findByEmail(email, pageable);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User Not found"));
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole());
     }
 
     @Override

@@ -4,6 +4,7 @@ import ampliedtech.com.attendenceApp.dto.AuthResponse;
 import ampliedtech.com.attendenceApp.dto.LoginRequest;
 import ampliedtech.com.attendenceApp.dto.RegisterRequest;
 import ampliedtech.com.attendenceApp.dto.UpdateRequest;
+import ampliedtech.com.attendenceApp.dto.UserResponse;
 import ampliedtech.com.attendenceApp.entity.User;
 import org.springframework.data.domain.Page;
 
@@ -15,7 +16,7 @@ public interface UserService extends UserDetailsService {
 
     AuthResponse loginUser(LoginRequest req);
 
-    Page<User> getCurrentUser(int page, int size);
+    UserResponse getCurrentUser();
 
     String deleteUser(Long id);
 
