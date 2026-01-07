@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ampliedtech.com.attendenceApp.dto.RegisterRequest;
 import ampliedtech.com.attendenceApp.dto.UserResponse;
 import ampliedtech.com.attendenceApp.dto.LoginRequest;
 import ampliedtech.com.attendenceApp.dto.AuthResponse;
@@ -27,12 +26,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(
-            @Valid @RequestBody RegisterRequest request) {
-        log.info("Register API called for email: {}", request.getEmail());
-        return ResponseEntity.ok(userService.registerUser(request));
-    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
@@ -46,7 +39,7 @@ public class UserController {
     public ResponseEntity<UserResponse> getCurrentUser() {
         UserResponse user = userService.getCurrentUser();
         UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(),
-                user.getName(), user.getRole());
+        user.getName(), user.getRole());
         return ResponseEntity.ok(userResponse);
     }
 }

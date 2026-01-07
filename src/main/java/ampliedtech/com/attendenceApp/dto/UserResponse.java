@@ -1,12 +1,11 @@
 package ampliedtech.com.attendenceApp.dto;
 
-import java.util.List;
-
 import ampliedtech.com.attendenceApp.entity.Role;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @AllArgsConstructor
 public class UserResponse {
     private Long id;

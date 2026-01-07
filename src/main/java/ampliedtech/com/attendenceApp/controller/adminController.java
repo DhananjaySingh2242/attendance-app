@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import ampliedtech.com.attendenceApp.dto.RegisterRequest;
 import ampliedtech.com.attendenceApp.dto.UpdateRequest;
 import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.service.UserService;
@@ -28,6 +30,13 @@ public class adminController {
 
     public adminController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(
+            @Valid @RequestBody RegisterRequest request) {
+        log.info("Register API called for email: {}", request.getEmail());
+        return ResponseEntity.ok(userService.registerUser(request));
     }
 
     @GetMapping("/all-user")

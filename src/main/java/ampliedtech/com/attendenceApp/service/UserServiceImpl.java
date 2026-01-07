@@ -10,7 +10,6 @@ import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.configuration.JwtUtil;
 
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties.Apiversion.Use;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +50,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public String registerUser(RegisterRequest request) {
         log.info("Attempting to register user with email: {}", request.getEmail());
         if (userRepository.findByEmail(request.email.trim()).isPresent()) {
@@ -126,7 +119,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public User updateUser(Long id, UpdateRequest updateData) {
         log.warn("Updating user with ID: {}", id);
         User user = userRepository.findById(id)
@@ -139,13 +131,13 @@ public class UserServiceImpl implements UserService {
         if (updateData.getPassword() != null && !updateData.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(updateData.getPassword()));
         }
-
         return userRepository.save(user);
     }
 
     @Override
     public Page<User> getAllUser(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        return userRepository.findAll(pageable);
-    }
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+            return userRepository.findAll(pageable);
+        }
 }
+
