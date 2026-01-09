@@ -2,29 +2,34 @@ package ampliedtech.com.attendenceApp.service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ampliedtech.com.attendenceApp.entity.Attendance;
+import ampliedtech.com.attendenceApp.document.AttendanceDocument;
+import ampliedtech.com.attendenceApp.document.AttendanceLog;
 import ampliedtech.com.attendenceApp.entity.AttendanceStatus;
 import ampliedtech.com.attendenceApp.entity.User;
-import ampliedtech.com.attendenceApp.repository.AttendanceRepository;
+import ampliedtech.com.attendenceApp.repository.AttendanceLogRepository;
+import ampliedtech.com.attendenceApp.repository.AttendanceRepo;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
 
 @Service
 public class AttendanceServiceImpl implements AttendenceService {
     private static final Logger log = LoggerFactory.getLogger(AttendanceServiceImpl.class);
-    private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+    private final AttendanceLogRepository attendanceLogRepository;
+    private final AttendanceRepo attendanceRepo;
 
-    public AttendanceServiceImpl(AttendanceRepository attendanceRepository, UserRepository userRepository) {
-        this.attendanceRepository = attendanceRepository;
+    public AttendanceServiceImpl(AttendanceRepo attendanceRepo, UserRepository userRepository,
+            AttendanceLogRepository attendanceLogRepository) {
+        this.attendanceRepo = attendanceRepo;
         this.userRepository = userRepository;
+        this.attendanceLogRepository = attendanceLogRepository;
     }
 
     @Override
@@ -35,30 +40,34 @@ public class AttendanceServiceImpl implements AttendenceService {
                     log.warn("Check-in failed. User not found: {}", email);
                     return new UsernameNotFoundException("User Not Found");
                 });
-        Attendance attendance = new Attendance();
-        attendance.setUser(user);
+
+        AttendanceDocument attendance = new AttendanceDocument();
+        attendance.setUserId(user.getId());
+        attendance.setEmail(user.getEmail());
         attendance.setDate(LocalDate.now());
         attendance.setCheckIn(LocalTime.now());
         attendance.setStatus(AttendanceStatus.PRESENT);
-        attendanceRepository.save(attendance);
-        log.info("Check-in successful for user: {} at {}", email, attendance.getCheckIn());
+        
+        attendanceRepo.save(attendance);
+        
+        AttendanceLog logg = new AttendanceLog();
+        logg.setUserId(user.getId());
+        logg.setEmail(email);
+        logg.setAction("Check-In");
+        logg.setTime(LocalDateTime.now());
+
+        attendanceLogRepository.save(logg);
+
     }
 
-    @Transactional
     @Override
     public void checkOut(String email) {
         log.info("Check-out attempt for user: {}", email);
-        User user = userRepository.findByEmail(email)
+        AttendanceDocument attendance = attendanceRepo
+                .findByEmailAndDate(email, LocalDate.now())
                 .orElseThrow(() -> {
                     log.warn("Check-out failed. User not found: {}", email);
                     return new UsernameNotFoundException("User not found");
-                });
-
-        Attendance attendance = attendanceRepository
-                .findByUserAndDate(user, LocalDate.now())
-                .orElseThrow(() -> {
-                    log.warn("Check-out failed. No check-in found for user: {}", email);
-                    return new RuntimeException("Check-in not found for today");
                 });
 
         if (attendance.getCheckOut() != null) {
@@ -85,8 +94,14 @@ public class AttendanceServiceImpl implements AttendenceService {
             attendance.setStatus(AttendanceStatus.PRESENT);
             log.info("User {} worked {} hours → marked PRESENT", email, workedHour);
         }
-
-        attendanceRepository.save(attendance);
+        attendanceRepo.save(attendance);
         log.info("Check-out successful for user: {} at {}", email, attendance.getCheckOut());
+
+        AttendanceLog logg = new AttendanceLog();
+        logg.setEmail(email);
+        logg.setAction("CHECK_OUT");
+        logg.setTime(LocalDateTime.now());
+
+        attendanceLogRepository.save(logg);
     }
 }
