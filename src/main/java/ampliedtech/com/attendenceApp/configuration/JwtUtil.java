@@ -1,10 +1,10 @@
 package ampliedtech.com.attendenceApp.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -18,11 +18,16 @@ public class JwtUtil {
     private String secretString = "my-ultra-secret-key-that-is-at-least-32-chars!!";
     private SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
 
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime midnight = now.toLocalDate().plusDays(1).atStartOfDay();
+    long miilisUntilMidnight = Duration.between(now, midnight).toMillis();
+    Date expiryDate = new Date(System.currentTimeMillis() + miilisUntilMidnight);
+
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(expiryDate)
                 .signWith(key)
                 .compact();
     }

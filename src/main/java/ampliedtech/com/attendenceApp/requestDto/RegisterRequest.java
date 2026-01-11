@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.dto;
+package ampliedtech.com.attendenceApp.requestDto;
 
 
 import jakarta.validation.constraints.Email;

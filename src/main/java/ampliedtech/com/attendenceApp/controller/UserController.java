@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ampliedtech.com.attendenceApp.dto.UserResponse;
-import ampliedtech.com.attendenceApp.dto.LoginRequest;
-import ampliedtech.com.attendenceApp.dto.AuthResponse;
+
+import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
+import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
+import ampliedtech.com.attendenceApp.responseDto.UserResponse;
 import ampliedtech.com.attendenceApp.service.UserService;
 import jakarta.validation.Valid;
 
@@ -38,8 +39,8 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser() {
         UserResponse user = userService.getCurrentUser();
-        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(),
-        user.getName(), user.getRole());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getName(),
+        user.getEmail(), user.getRole());
         return ResponseEntity.ok(userResponse);
     }
 }

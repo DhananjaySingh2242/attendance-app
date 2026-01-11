@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.dto;
+package ampliedtech.com.attendenceApp.responseDto;
 
 import ampliedtech.com.attendenceApp.entity.Role;
 import lombok.AllArgsConstructor;

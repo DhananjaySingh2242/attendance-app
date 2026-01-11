@@ -1,13 +1,17 @@
 package ampliedtech.com.attendenceApp.service;
 
-import ampliedtech.com.attendenceApp.dto.AuthResponse;
-import ampliedtech.com.attendenceApp.dto.LoginRequest;
-import ampliedtech.com.attendenceApp.dto.RegisterRequest;
-import ampliedtech.com.attendenceApp.dto.UpdateRequest;
-import ampliedtech.com.attendenceApp.dto.UserResponse;
 import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
+import ampliedtech.com.attendenceApp.mapper.UserResMapper;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
+import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
+import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
+import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
+import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
+import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
+import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
+import ampliedtech.com.attendenceApp.responseDto.UserResponse;
 import ampliedtech.com.attendenceApp.configuration.JwtUtil;
 
 import org.springframework.context.annotation.Lazy;
@@ -20,6 +24,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String registerUser(RegisterRequest request) {
+    public RegisterResponse registerUser(RegisterRequest request) {
         log.info("Attempting to register user with email: {}", request.getEmail());
         if (userRepository.findByEmail(request.email.trim()).isPresent()) {
             log.warn("Registration failed. Email already exists: {}",
@@ -61,14 +68,18 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.email.trim());
         user.setName(request.name);
         user.setRole(Role.ROLE_USER);
-
         user.setPassword(passwordEncoder.encode(request.password));
 
         try {
-            userRepository.save(user);
+            User savedUser = userRepository.save(user);
             log.info("User registered successfully with email: {}",
                     request.getEmail());
-            return "User registered successfully with name :" + request.name;
+
+                    RegisterResponse response = new RegisterResponse();
+                    response.setUserId(savedUser.getId());
+                    response.setMessage("User registered successfully");
+                    response.setTimestamp(LocalDateTime.now());
+            return response;
         } catch (Exception ex) {
             log.error("Error while registering user with email: {}",
                     request.getEmail(), ex);
@@ -89,11 +100,9 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-
-        AuthResponse res = new AuthResponse();
-        res.token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail());
         log.info("Login successful for email: {}", request.getEmail());
-        return res;
+        return new AuthResponse(token);
     }
 
     @Override
@@ -109,17 +118,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String deleteUser(Long id) {
+    public DeleteResponse deleteUser(Long id) {
         log.warn("Deleting user with ID: {}", id);
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Error: User with ID " + id + " does not exist.");
         }
         userRepository.deleteById(id);
-        return "User deleted successfully!";
+        return new DeleteResponse(id, "User Deleted", LocalDateTime.now());
     }
 
     @Override
-    public User updateUser(Long id, UpdateRequest updateData) {
+    public UpdateResponse updateUser(Long id, UpdateRequest updateData) {
         log.warn("Updating user with ID: {}", id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -131,7 +140,8 @@ public class UserServiceImpl implements UserService {
         if (updateData.getPassword() != null && !updateData.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(updateData.getPassword()));
         }
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return UserResMapper.toDto(savedUser);
     }
 
     @Override
