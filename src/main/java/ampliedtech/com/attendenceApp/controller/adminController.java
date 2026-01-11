@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -50,8 +51,7 @@ public class adminController {
             @RequestParam(defaultValue = "10") int size) {
         log.info("Fetching all users - Page: {}, Size: {}", page, size);
         try {
-            Page<User> user = userService.getAllUser(page, size);
-            Page<UserResponse> dtoPage = user.map(GetUserMapper::toDto);
+            Page<UserResponse> dtoPage = userService.getAllUser(page, size);
             return ResponseEntity.ok(new PagedModel<>(dtoPage));
         } catch (Exception ex) {
             log.error("Database error during user fetch");

@@ -37,6 +37,4 @@ private List<AttendanceSession> sessions;
 private long totalDurationMinutes;
 
 private AttendanceStatus status;
-
-
 }

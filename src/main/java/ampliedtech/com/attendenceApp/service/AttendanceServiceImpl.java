@@ -57,7 +57,7 @@ public class AttendanceServiceImpl implements AttendenceService {
 
         long ttl = getMillisTillMidnight();
         if (ttl <= 0) {
-            ttl = 5 * 60 * 1000;
+            ttl = 60 * 60 * 1000;
         }
 
         redisTemplate.opsForValue().set(

@@ -2,6 +2,7 @@ package ampliedtech.com.attendenceApp.service;
 
 import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
+import ampliedtech.com.attendenceApp.mapper.GetUserMapper;
 import ampliedtech.com.attendenceApp.mapper.UserResMapper;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
@@ -145,9 +146,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> getAllUser(int page, int size) {
+    public Page<UserResponse> getAllUser(int page, int size) {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-            return userRepository.findAll(pageable);
+            Page<User> userPage = userRepository.findAll(pageable);
+            return userPage.map(GetUserMapper::toDto);
         }
 }
 

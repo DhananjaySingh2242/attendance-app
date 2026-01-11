@@ -26,5 +26,5 @@ public interface UserService extends UserDetailsService {
 
     UpdateResponse updateUser(Long id, UpdateRequest updateData);
 
-    Page<User> getAllUser(int page,int size);
+    Page<UserResponse> getAllUser(int page,int size);
 }

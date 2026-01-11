@@ -9,7 +9,7 @@ public static UpdateResponse toDto(User user){
     res.setId(user.getId());
     res.setEmail(user.getEmail());
     res.setName(user.getName());
-    res.setPassword(user.getPassword());
+    res.setMessage("User Updated");
     return res;
 }
 }
