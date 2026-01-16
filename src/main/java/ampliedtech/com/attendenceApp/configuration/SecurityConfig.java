@@ -8,6 +8,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
+import ampliedtech.com.attendenceApp.utils.JwtFilter;
+
 @EnableWebSecurity
 @Component
 public class SecurityConfig {

@@ -13,7 +13,7 @@ import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
 import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
-import ampliedtech.com.attendenceApp.configuration.JwtUtil;
+import ampliedtech.com.attendenceApp.utils.JwtUtil;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -152,4 +152,3 @@ public class UserServiceImpl implements UserService {
             return userPage.map(GetUserMapper::toDto);
         }
 }
-

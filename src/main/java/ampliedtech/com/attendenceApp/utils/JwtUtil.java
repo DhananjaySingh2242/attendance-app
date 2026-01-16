@@ -1,15 +1,14 @@
-package ampliedtech.com.attendenceApp.configuration;
+package ampliedtech.com.attendenceApp.utils;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -18,10 +17,7 @@ public class JwtUtil {
     private String secretString = "my-ultra-secret-key-that-is-at-least-32-chars!!";
     private SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
 
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime midnight = now.toLocalDate().plusDays(1).atStartOfDay();
-    long miilisUntilMidnight = Duration.between(now, midnight).toMillis();
-    Date expiryDate = new Date(System.currentTimeMillis() + miilisUntilMidnight);
+    Date expiryDate = new Date(System.currentTimeMillis() + CountMillisTillMidNight.getMillisTillMidNight());
 
     public String generateToken(String email) {
         return Jwts.builder()

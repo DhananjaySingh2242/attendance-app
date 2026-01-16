@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 public class AttendanceSession {
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;

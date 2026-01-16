@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import ampliedtech.com.attendenceApp.entity.User;
-import ampliedtech.com.attendenceApp.mapper.GetUserMapper;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
@@ -30,11 +27,11 @@ import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/admin")
-public class adminController {
+public class AdminController {
     private final UserService userService;
-    private static final Logger log = LoggerFactory.getLogger(adminController.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
-    public adminController(UserService userService) {
+    public AdminController(UserService userService) {
         this.userService = userService;
     }
 

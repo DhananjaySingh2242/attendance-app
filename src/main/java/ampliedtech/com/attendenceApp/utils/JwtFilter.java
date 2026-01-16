@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.configuration;
+package ampliedtech.com.attendenceApp.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

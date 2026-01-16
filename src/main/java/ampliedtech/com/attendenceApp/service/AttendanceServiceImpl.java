@@ -13,29 +13,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ampliedtech.com.attendenceApp.document.AttendanceDocument;
-import ampliedtech.com.attendenceApp.document.AttendanceLog;
 import ampliedtech.com.attendenceApp.document.AttendanceSession;
 import ampliedtech.com.attendenceApp.entity.AttendanceStatus;
 import ampliedtech.com.attendenceApp.entity.User;
-import ampliedtech.com.attendenceApp.repository.AttendanceLogRepository;
+import ampliedtech.com.attendenceApp.event.AttendanceEvent;
+import ampliedtech.com.attendenceApp.publisher.AttendanceEventPublisher;
 import ampliedtech.com.attendenceApp.repository.AttendanceRepo;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
+import ampliedtech.com.attendenceApp.utils.CountMillisTillMidNight;
 import jakarta.transaction.Transactional;
 
 @Service
 public class AttendanceServiceImpl implements AttendenceService {
     private static final Logger log = LoggerFactory.getLogger(AttendanceServiceImpl.class);
     private final UserRepository userRepository;
-    private final AttendanceLogRepository attendanceLogRepository;
     private final AttendanceRepo attendanceRepo;
     private final StringRedisTemplate redisTemplate;
+    private final AttendanceEventPublisher attendanceEventPublisher;
 
     public AttendanceServiceImpl(AttendanceRepo attendanceRepo, UserRepository userRepository,
-            AttendanceLogRepository attendanceLogRepository, StringRedisTemplate redisTemplate) {
+           StringRedisTemplate redisTemplate,
+            AttendanceEventPublisher attendanceEventPublisher) {
         this.attendanceRepo = attendanceRepo;
         this.userRepository = userRepository;
-        this.attendanceLogRepository = attendanceLogRepository;
         this.redisTemplate = redisTemplate;
+        this.attendanceEventPublisher = attendanceEventPublisher;
     }
 
     @Override
@@ -54,8 +56,7 @@ public class AttendanceServiceImpl implements AttendenceService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-
-        long ttl = getMillisTillMidnight();
+        long ttl = CountMillisTillMidNight.getMillisTillMidNight();
         if (ttl <= 0) {
             ttl = 60 * 60 * 1000;
         }
@@ -88,9 +89,15 @@ public class AttendanceServiceImpl implements AttendenceService {
                         .build());
 
         attendanceRepo.save(attendance);
-        saveLog(user, "CHECK_IN");
 
-        log.info("Check-in successful for {}", email);
+        AttendanceEvent event = new AttendanceEvent();
+        event.setId(user.getId());
+        event.setEmail(user.getEmail());
+        event.setAction("CHECK_IN");
+        event.setTime(LocalDateTime.now());
+
+        attendanceEventPublisher.publish(event);
+            log.info("Check-in successful for {}", email);
     }
 
     @Override
@@ -129,31 +136,21 @@ public class AttendanceServiceImpl implements AttendenceService {
 
         redisTemplate.delete(redisKey);
 
-        saveLog(user, "CHECK_OUT");
+        AttendanceEvent event = new AttendanceEvent();
+        event.setId(user.getId());
+        event.setEmail(user.getEmail());
+        event.setAction("CHECK-OUT");
+        event.setTime(checkOutTime);
+        
+        attendanceEventPublisher.publish(event);
         log.info("Check-out successful for {}", email);
     }
 
     private AttendanceStatus calculateStatus(long totalMinutes) {
-        if (totalMinutes < 120)
+        if (totalMinutes <= 120)
             return AttendanceStatus.ABSENT;
         if (totalMinutes <= 240)
             return AttendanceStatus.HALFDAY;
         return AttendanceStatus.PRESENT;
     }
-
-    private void saveLog(User user, String action) {
-        AttendanceLog logg = new AttendanceLog();
-        logg.setUserId(user.getId());
-        logg.setEmail(user.getEmail());
-        logg.setAction(action);
-        logg.setTime(LocalDateTime.now());
-        attendanceLogRepository.save(logg);
-    }
-
-    private long getMillisTillMidnight() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime midnight = now.toLocalDate().plusDays(1).atStartOfDay();
-        return Duration.between(now, midnight).toMillis();
-    }
-
 }
