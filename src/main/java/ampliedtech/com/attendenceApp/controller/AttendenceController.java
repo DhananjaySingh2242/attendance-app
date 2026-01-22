@@ -1,7 +1,7 @@
 package ampliedtech.com.attendenceApp.controller;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,17 +14,18 @@ import org.springframework.security.core.Authentication;
 import ampliedtech.com.attendenceApp.service.AttendenceService;
 
 @RestController
-@RequestMapping("/attendance")
+@RequestMapping("/api/attendance")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AttendenceController {
     private static final Logger log = LoggerFactory.getLogger(AttendenceController.class);
 
     private final AttendenceService attendenceService;
 
-    public AttendenceController(AttendenceService attendanceService) {
-        this.attendenceService = attendanceService;
+    public AttendenceController(AttendenceService attendenceService) {
+        this.attendenceService = attendenceService;
     }
 
-    @PostMapping("/check-In")
+    @PostMapping("/check-in")
     public ResponseEntity<String> checkIn(Authentication authentication) {
         try {
             attendenceService.checkIn(authentication.getName());
@@ -38,7 +39,7 @@ public class AttendenceController {
     @PostMapping("/check-out")
     public ResponseEntity<String> checkOut(Authentication authentication) {
         attendenceService.checkOut(authentication.getName());
-        log.info("Check-out succesfull");
+        log.info("Check-out successful");
         return ResponseEntity.ok("Checked out successfully");
     }
 }

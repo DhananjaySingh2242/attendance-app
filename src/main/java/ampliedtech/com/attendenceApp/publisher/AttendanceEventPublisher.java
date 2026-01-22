@@ -21,4 +21,3 @@ public void publish(AttendanceEvent event){
     );
 }
 }
-

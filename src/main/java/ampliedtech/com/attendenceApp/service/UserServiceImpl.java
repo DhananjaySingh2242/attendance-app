@@ -13,7 +13,7 @@ import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
 import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
-import ampliedtech.com.attendenceApp.utils.JwtUtil;
+import ampliedtech.com.attendenceApp.security.JwtUtil;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -60,16 +60,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public RegisterResponse registerUser(RegisterRequest request) {
         log.info("Attempting to register user with email: {}", request.getEmail());
-        if (userRepository.findByEmail(request.email.trim()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail().trim()).isPresent()) {
             log.warn("Registration failed. Email already exists: {}",
                     request.getEmail());
             throw new RuntimeException("Email already registered");
         }
         User user = new User();
-        user.setEmail(request.email.trim());
-        user.setName(request.name);
+        user.setEmail(request.getEmail().trim());
+        user.setName(request.getName());
         user.setRole(Role.ROLE_USER);
-        user.setPassword(passwordEncoder.encode(request.password));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         try {
             User savedUser = userRepository.save(user);
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user);
         log.info("Login successful for email: {}", request.getEmail());
         return new AuthResponse(token);
     }
@@ -133,7 +133,6 @@ public class UserServiceImpl implements UserService {
         log.warn("Updating user with ID: {}", id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
         if (updateData.getName() != null && !updateData.getName().isEmpty()) {
             user.setName(updateData.getName());
         }

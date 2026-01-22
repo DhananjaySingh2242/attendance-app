@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.utils;
+package ampliedtech.com.attendenceApp.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

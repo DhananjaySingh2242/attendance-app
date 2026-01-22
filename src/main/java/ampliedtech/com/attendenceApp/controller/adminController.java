@@ -3,7 +3,6 @@ package ampliedtech.com.attendenceApp.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +24,11 @@ import ampliedtech.com.attendenceApp.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
     private final UserService userService;
     private static final Logger log = LoggerFactory.getLogger(AdminController.class);
@@ -42,19 +44,21 @@ public class AdminController {
         return ResponseEntity.ok(userService.registerUser(request));
     }
 
-    @GetMapping("/all-user")
-    public ResponseEntity<PagedModel<UserResponse>> getAllUser(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("Fetching all users - Page: {}, Size: {}", page, size);
-        try {
+    @GetMapping("/all-users")
+public ResponseEntity<Page<UserResponse>> getAllUser(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+
+    log.info("Fetching all users - Page: {}, Size: {}", page, size);
+       try {
             Page<UserResponse> dtoPage = userService.getAllUser(page, size);
-            return ResponseEntity.ok(new PagedModel<>(dtoPage));
+            return ResponseEntity.ok(dtoPage);
         } catch (Exception ex) {
             log.error("Database error during user fetch");
-            throw new RuntimeException("Could not retrive user list for page " + page, ex);
+            throw new RuntimeException("Could not retrieve user list for page " + page, ex);
         }
-    }
+}
+
 
     @DeleteMapping("/delete/{id}")
     public DeleteResponse deleteUser(

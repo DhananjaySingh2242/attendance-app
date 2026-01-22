@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.utils;
+package ampliedtech.com.attendenceApp.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import io.jsonwebtoken.JwtException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UserService userService;
@@ -32,14 +32,14 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        logger.debug("JwtFilter triggered for URI: {}", request.getRequestURI());
+        log.debug("JwtFilter triggered for URI: {}", request.getRequestURI());
         String header = request.getHeader("Authorization");
-        logger.debug("Authorization Header: {}", header);
+        log.debug("Authorization Header: {}", header);
         try {
             if (header != null && header.startsWith("Bearer ")) {
                 String token = header.substring(7);
                 String email = jwtUtil.extractEmail(token);
-                logger.debug("Extracted email from token: {}", email);
+                log.debug("Extracted email from token: {}", email);
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     var userDetails = userService.loadUserByUsername(email);
                     if (jwtUtil.validateToken(token, userDetails)) {
@@ -50,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JwtException ex) {
-            logger.debug("JWT processing failed: " + ex.getMessage());
+            log.debug("JWT processing failed: " + ex.getMessage());
         }
         filterChain.doFilter(request, response);
     }

@@ -1,6 +1,7 @@
 package ampliedtech.com.attendenceApp.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     private final UserService userService;
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -26,7 +28,6 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
@@ -39,8 +40,11 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser() {
         UserResponse user = userService.getCurrentUser();
-        UserResponse userResponse = new UserResponse(user.getId(), user.getName(),
-        user.getEmail(), user.getRole());
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole());
         return ResponseEntity.ok(userResponse);
     }
 }

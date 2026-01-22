@@ -16,8 +16,8 @@ public class AttendenceAppApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AttendenceAppApplication.class, args);
 	}
-@Bean 
-public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory){
-	return new JpaTransactionManager(entityManagerFactory);
-}
+	@Bean
+	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		return new JpaTransactionManager(entityManagerFactory);
+	}
 }

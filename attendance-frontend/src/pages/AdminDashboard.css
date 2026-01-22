@@ -1,0 +1,167 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Page container */
+.admin-page {
+  min-height: 100vh;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+/* Card */
+.admin-card {
+  max-width: 1100px;
+  margin: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 30px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Title */
+.admin-card h1 {
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+/* Section titles */
+.admin-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #444;
+}
+
+/* Forms */
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.admin-form input,
+.admin-form select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  font-size: 14px;
+}
+
+.admin-form input:focus,
+.admin-form select:focus {
+  outline: none;
+  border-color: #1677ff;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: #1677ff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #0958d9;
+}
+
+.btn-danger {
+  background: #ff4d4f;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #d9363e;
+}
+
+.btn-secondary {
+  background: #e6f4ff;
+  color: #1677ff;
+}
+
+.btn-secondary:hover {
+  background: #bae0ff;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 30px 0;
+}
+
+/* Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 14px 12px;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #555;
+}
+
+.admin-table tr {
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table tr:hover {
+  background: #f9f9f9;
+}
+
+/* Action buttons */
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Update box */
+.update-box {
+  margin-top: 25px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+/* Logout */
+.logout-btn {
+  margin-top: 30px;
+  background: #111;
+  color: #fff;
+}
+
+.logout-btn:hover {
+  background: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .table-actions {
+    flex-direction: column;
+  }
+}
