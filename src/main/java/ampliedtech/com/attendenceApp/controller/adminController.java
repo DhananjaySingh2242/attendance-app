@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
 import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
@@ -45,20 +46,19 @@ public class AdminController {
     }
 
     @GetMapping("/all-users")
-public ResponseEntity<Page<UserResponse>> getAllUser(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<Page<UserResponse>> getAllUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-    log.info("Fetching all users - Page: {}, Size: {}", page, size);
-       try {
+        log.info("Fetching all users - Page: {}, Size: {}", page, size);
+        try {
             Page<UserResponse> dtoPage = userService.getAllUser(page, size);
             return ResponseEntity.ok(dtoPage);
         } catch (Exception ex) {
             log.error("Database error during user fetch");
             throw new RuntimeException("Could not retrieve user list for page " + page, ex);
         }
-}
-
+    }
 
     @DeleteMapping("/delete/{id}")
     public DeleteResponse deleteUser(
@@ -74,5 +74,19 @@ public ResponseEntity<Page<UserResponse>> getAllUser(
 
         log.info("Update user API called for userId: {}", id);
         return userService.updateUser(id, request);
+    }
+
+    @GetMapping("/all-attendance")
+    public ResponseEntity<Page<AttendanceResponse>> getAttendance(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("Fetching all users - Page: {}, Size: {}", page, size);
+        try {
+            Page<AttendanceResponse> response = userService.getAttendance(page, size);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            log.error("Database Error during fetch");
+            throw new RuntimeException("Could not retrieve user list for page " + page, ex);
+        }
     }
 }

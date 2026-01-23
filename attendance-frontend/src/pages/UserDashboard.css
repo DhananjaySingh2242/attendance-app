@@ -1,4 +1,3 @@
-/* Reset browser default spacing */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -50,7 +49,7 @@
 .dashboard-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
   margin-top: 20px;
 }
 

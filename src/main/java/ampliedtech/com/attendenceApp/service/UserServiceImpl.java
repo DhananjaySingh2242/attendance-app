@@ -1,13 +1,17 @@
 package ampliedtech.com.attendenceApp.service;
 
+import ampliedtech.com.attendenceApp.document.AttendanceDocument;
 import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
+import ampliedtech.com.attendenceApp.mapper.GetAttendanceMapper;
 import ampliedtech.com.attendenceApp.mapper.GetUserMapper;
 import ampliedtech.com.attendenceApp.mapper.UserResMapper;
+import ampliedtech.com.attendenceApp.repository.AttendanceRepo;
 import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
 import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
@@ -37,12 +41,16 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AttendanceRepo attendanceRepo;
     private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(@Lazy UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public UserServiceImpl(@Lazy UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
+        AttendanceRepo attendanceRepo
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.attendanceRepo = attendanceRepo;
     }
 
     @Override
@@ -149,5 +157,12 @@ public class UserServiceImpl implements UserService {
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
             Page<User> userPage = userRepository.findAll(pageable);
             return userPage.map(GetUserMapper::toDto);
+        }
+
+        @Override
+        public Page<AttendanceResponse> getAttendance(int page,int size){
+            Pageable pageable = PageRequest.of(page,size,Sort.by("id").ascending());
+            Page<AttendanceDocument> attendancePage = attendanceRepo.findAll(pageable);
+            return attendancePage.map(GetAttendanceMapper::toDto);
         }
 }

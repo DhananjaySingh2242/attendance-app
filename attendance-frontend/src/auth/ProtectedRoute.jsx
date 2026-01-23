@@ -8,7 +8,6 @@ const ProtectedRoute = ({ role, children }) => {
     return <Navigate to="/login" />;
   }
 
-  // allow ADMIN to access USER routes if needed
   if (role === "ROLE_USER" && userRole === "ROLE_ADMIN") {
     return children;
   }

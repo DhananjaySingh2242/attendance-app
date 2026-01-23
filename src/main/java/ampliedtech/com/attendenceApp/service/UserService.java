@@ -4,6 +4,7 @@ import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
 import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
@@ -26,5 +27,7 @@ public interface UserService extends UserDetailsService {
 
     UpdateResponse updateUser(Long id, UpdateRequest updateData);
 
-    Page<UserResponse> getAllUser(int page,int size);
+    Page<UserResponse> getAllUser(int page, int size);
+
+    Page<AttendanceResponse> getAttendance(int page, int size);
 }

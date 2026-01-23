@@ -3,7 +3,6 @@ import Login from "./pages/Login";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./auth/ProtectedRoute";
-import { Outlet } from "react-router-dom";
 
 function App() {
   return (
@@ -26,6 +25,8 @@ function App() {
   </Routes>
 </BrowserRouter>
 
+
   );
+  
 }
 export default App;

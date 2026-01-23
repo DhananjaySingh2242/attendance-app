@@ -1,7 +1,6 @@
 package ampliedtech.com.attendenceApp.document;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.index.CompoundIndex;

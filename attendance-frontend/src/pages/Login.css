@@ -9,8 +9,9 @@
 
 /* Card */
 .login-card {
-  width: 360px;
-  padding: 30px;
+  width: 460px;
+  height: 350px;
+  padding: 40px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -21,7 +22,7 @@
 /* Heading */
 .login-card h2 {
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
   color: #333;
 }
 
