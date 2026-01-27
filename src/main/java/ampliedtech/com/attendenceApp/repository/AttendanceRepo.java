@@ -1,6 +1,7 @@
 package ampliedtech.com.attendenceApp.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -14,4 +15,5 @@ import ampliedtech.com.attendenceApp.document.AttendanceDocument;
 public interface AttendanceRepo extends MongoRepository<AttendanceDocument, String> {
     Optional<AttendanceDocument> findByEmailAndDate(String email, LocalDate date);
     Page<AttendanceDocument> findByEmailAndDate(String email,Pageable pageable);
+    List<AttendanceDocument>findAllByEmailOrderByDateDesc(String email);
 }

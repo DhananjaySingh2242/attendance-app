@@ -32,7 +32,7 @@ public class AttendanceServiceImpl implements AttendenceService {
     private final AttendanceEventPublisher attendanceEventPublisher;
 
     public AttendanceServiceImpl(AttendanceRepo attendanceRepo, UserRepository userRepository,
-           StringRedisTemplate redisTemplate,
+            StringRedisTemplate redisTemplate,
             AttendanceEventPublisher attendanceEventPublisher) {
         this.attendanceRepo = attendanceRepo;
         this.userRepository = userRepository;
@@ -97,7 +97,7 @@ public class AttendanceServiceImpl implements AttendenceService {
         event.setTime(LocalDateTime.now());
 
         attendanceEventPublisher.publish(event);
-            log.info("Check-in successful for {}", email);
+        log.info("Check-in successful for {}", email);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class AttendanceServiceImpl implements AttendenceService {
         event.setEmail(user.getEmail());
         event.setAction("CHECK-OUT");
         event.setTime(checkOutTime);
-        
+
         attendanceEventPublisher.publish(event);
         log.info("Check-out successful for {}", email);
     }

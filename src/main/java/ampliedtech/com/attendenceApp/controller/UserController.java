@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
+import ampliedtech.com.attendenceApp.responseDto.AllAtendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
 import ampliedtech.com.attendenceApp.service.UserService;
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,5 +49,9 @@ public class UserController {
                 user.getEmail(),
                 user.getRole());
         return ResponseEntity.ok(userResponse);
+    }
+    @GetMapping("/my-attendance")
+    public ResponseEntity<List<AllAtendanceResponse>> currentUserAttendacne(){
+        return ResponseEntity.ok(userService.currentUserAllAttendance());
     }
 }

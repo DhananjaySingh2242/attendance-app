@@ -11,6 +11,7 @@ import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendenceApp.responseDto.AllAtendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
@@ -31,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +47,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
 
     public UserServiceImpl(@Lazy UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-        AttendanceRepo attendanceRepo
-    ) {
+            AttendanceRepo attendanceRepo) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -84,10 +85,10 @@ public class UserServiceImpl implements UserService {
             log.info("User registered successfully with email: {}",
                     request.getEmail());
 
-                    RegisterResponse response = new RegisterResponse();
-                    response.setUserId(savedUser.getId());
-                    response.setMessage("User registered successfully");
-                    response.setTimestamp(LocalDateTime.now());
+            RegisterResponse response = new RegisterResponse();
+            response.setUserId(savedUser.getId());
+            response.setMessage("User registered successfully");
+            response.setTimestamp(LocalDateTime.now());
             return response;
         } catch (Exception ex) {
             log.error("Error while registering user with email: {}",
@@ -154,15 +155,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> getAllUser(int page, int size) {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-            Page<User> userPage = userRepository.findAll(pageable);
-            return userPage.map(GetUserMapper::toDto);
-        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(GetUserMapper::toDto);
+    }
 
-        @Override
-        public Page<AttendanceResponse> getAttendance(int page,int size){
-            Pageable pageable = PageRequest.of(page,size,Sort.by("id").ascending());
-            Page<AttendanceDocument> attendancePage = attendanceRepo.findAll(pageable);
-            return attendancePage.map(GetAttendanceMapper::toDto);
+    @Override
+    public Page<AttendanceResponse> getAttendance(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<AttendanceDocument> attendancePage = attendanceRepo.findAll(pageable);
+        return attendancePage.map(GetAttendanceMapper::toDto);
+    }
+
+    @Override
+    public List<AllAtendanceResponse> currentUserAllAttendance() {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<AttendanceDocument> attendanceList = attendanceRepo.findAllByEmailOrderByDateDesc(email);
+
+        if (attendanceList.isEmpty()) {
+            throw new RuntimeException("No attendance records found");
         }
+        return attendanceList.stream()
+                .map(attendance -> new AllAtendanceResponse(
+                        attendance.getDate(),
+                        attendance.getStatus()))
+                .toList();
+    }
+
+    @Override
+    public List<UserResponse> searchUsers(String keyword) {
+        keyword = keyword.trim();
+        return userRepository
+                .findByEmailContainingIgnoreCaseOrNameContainingIgnoreCase(
+                        keyword, keyword);
+    }
 }

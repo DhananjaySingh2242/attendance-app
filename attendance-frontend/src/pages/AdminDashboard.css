@@ -5,24 +5,34 @@
   font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
 
+/* ================= PAGE ================= */
 .admin-page {
   min-height: 100vh;
   background-image: url("https://media.istockphoto.com/id/1372132668/vector/silhouette-forest-background-forest-panorama-view-3d-wood-or-forest-background.jpg?s=612x612&w=0&k=20&c=QgsQQQEEt7r2zO54qF107pih2fZ9mN3UUfIE-ZUOtUM=");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  padding: 30px;
 }
 
-
+/* ================= CARD ================= */
 .admin-card {
   max-width: 1100px;
   margin: auto;
-  background: #ffffff;
+  background: #fff;
   border-radius: 14px;
   padding: 30px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 90vh;
+  position: relative;
 }
 
+.admin-content {
+  flex: 1; /* take remaining space */
+}
+
+/* ================= HEADINGS ================= */
 .admin-card h1 {
   font-size: 26px;
   margin-bottom: 20px;
@@ -35,6 +45,14 @@
   color: #2c3e50;
 }
 
+/* ================= PAGE SWITCH ================= */
+.page-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* ================= FORM ================= */
 .admin-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -56,42 +74,25 @@
   border-color: #1677ff;
 }
 
+/* ================= BUTTONS ================= */
 .btn {
-  padding: 10px 16px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 20px;
+  border-radius: 22px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.btn-primary {
-  background: #1677ff;
-  color: #fff;
-}
+.btn-primary { background: #1677ff; color: #fff; }
+.btn-primary:hover { background: #0958d9; }
 
-.btn-primary:hover {
-  background: #0958d9;
-}
+.btn-secondary { background: #e6f4ff; color: #1677ff; }
+.btn-secondary:hover { background: #bae0ff; }
 
-.btn-secondary {
-  background: #e6f4ff;
-  color: #1677ff;
-}
-
-.btn-secondary:hover {
-  background: #bae0ff;
-}
-
-.btn-danger {
-  background: #ff4d4f;
-  color: #fff;
-}
-
-.btn-danger:hover {
-  background: #d9363e;
-}
+.btn-danger { background: #ff4d4f; color: #fff; }
+.btn-danger:hover { background: #d9363e; }
 
 /* ================= DIVIDER ================= */
 .divider {
@@ -104,29 +105,27 @@
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
+  background: #fff;
   border-radius: 10px;
   overflow: hidden;
   margin-top: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Header */
 .admin-table thead {
   background: linear-gradient(135deg, #2119b8, #6366f1);
 }
 
 .admin-table th {
-  padding: 14px 12px;
+  padding: 12px;
   text-align: left;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: #fff;
 }
 
-/* Body */
 .admin-table td {
-  padding: 14px 12px;
+  padding: 12px;
   font-size: 14px;
   color: #374151;
 }
@@ -139,7 +138,6 @@
   background: #f9fafb;
 }
 
-/* Empty state */
 .admin-table td[colspan] {
   text-align: center;
   padding: 20px;
@@ -147,16 +145,9 @@
   font-style: italic;
 }
 
-/* ================= STATUS COLORS ================= */
-.status-present {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.status-absent {
-  color: #dc2626;
-  font-weight: 600;
-}
+/* ================= STATUS ================= */
+.status-present { color: #16a34a; font-weight: 600; }
+.status-absent { color: #dc2626; font-weight: 600; }
 
 /* ================= PAGINATION ================= */
 .pagination {
@@ -167,79 +158,93 @@
   margin-top: 20px;
 }
 
-.pagination button {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #e6f4ff;
-  border-color: #1677ff;
-  color: #1677ff;
-}
-
-.pagination button:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
+.pagination span { font-weight: 500; color: #374151; }
 
 /* ================= LOGOUT ================= */
 .logout-btn {
-  margin-top: 30px;
+  position: absolute;
+  bottom: 700px;
+  right: 20px;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 12px;
   background: #111;
   color: #fff;
+  cursor: pointer;
 }
 
-.logout-btn:hover {
-  background: #333;
-}
+.logout-btn:hover { background: #333; }
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
-  .admin-form {
-    grid-template-columns: 1fr;
-  }
+  .admin-form { grid-template-columns: 1fr; }
 
-  .admin-table thead {
-    display: none;
+  .admin-table thead { display: none; }
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+    display: block; width: 100%;
   }
+  .admin-table tr { margin-bottom: 15px; border-radius: 10px; padding: 10px; border: 1px solid #e5e7eb; }
+  .admin-table td { display: flex; justify-content: space-between; padding: 8px 10px; }
+  .admin-table td::before { content: attr(data-label); font-weight: 600; color: #6b7280; }
 
-  .admin-table,
-  .admin-table tbody,
-  .admin-table tr,
-  .admin-table td {
-    display: block;
-    width: 100%;
+  .logout-btn {
+    position: static;
+    margin-top: 20px;
+    align-self: center;
   }
+}
+/* SEARCH CONTAINER */
+.search-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
 
-  .admin-table tr {
-    margin-bottom: 15px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 10px;
+/* SEARCH ICON */
+.search-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #444;
+  padding: 6px;
+}
+
+.search-icon-btn:hover {
+  transform: scale(1.1);
+}
+
+/* SEARCH BOX */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 0.2s ease-in-out;
+}
+
+.search-box input {
+  width: 220px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* CLOSE BUTTON */
+.search-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #777;
+}
+
+/* SLIDE ANIMATION */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
   }
-
-  .admin-table td {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 10px;
-  }
-
-  .admin-table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #6b7280;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

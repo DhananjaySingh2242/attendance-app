@@ -1,5 +1,7 @@
 package ampliedtech.com.attendenceApp.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
 import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
@@ -88,5 +91,9 @@ public class AdminController {
             log.error("Database Error during fetch");
             throw new RuntimeException("Could not retrieve user list for page " + page, ex);
         }
+    }
+    @GetMapping("/users/search")
+    public List<UserResponse> searchUsers(@RequestParam String keyword){
+        return userService.searchUsers(keyword);
     }
 }

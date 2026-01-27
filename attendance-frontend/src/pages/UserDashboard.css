@@ -4,11 +4,9 @@
   padding: 0;
 }
 
-/* Page wrapper with login-like background */
+/* ================= PAGE WRAPPER ================= */
 .dashboard-page {
   min-height: 100vh;
-
-  /* Gradient background like login page */
   background: linear-gradient(135deg, #667eea, #764ba2);
 
   display: flex;
@@ -17,9 +15,79 @@
 
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  position: relative;
 }
 
-/* Dashboard card */
+/* ================= LOGOUT BUTTON ================= */
+.logout-btn {
+  position: fixed;
+  top: 75px;
+  right: 4px; /* shifted left to make space for calendar */
+
+  padding: 10px 18px;
+  background: #ff4d4f;
+  color: #fff;
+
+  border: none;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: background 0.3s ease;
+  z-index: 1000;
+}
+
+.logout-btn:hover {
+  background: #e04344;
+}
+
+/* ================= CALENDAR ICON ================= */
+.calendar-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  cursor: pointer;
+
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.calendar-icon:hover {
+  transform: scale(1.1);
+}
+
+/* ================= CALENDAR POPUP ================= */
+.calendar-popup {
+  position: fixed;
+  top: 75px;
+  right: 20px;
+
+  background: #ffffff;
+  padding: 12px;
+
+  border-radius: 14px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+
+  z-index: 1000;
+}
+
+/* ================= DASHBOARD CARD ================= */
 .dashboard-card {
   width: 100%;
   max-width: 420px;
@@ -32,9 +100,9 @@
   text-align: center;
 }
 
-/* User info text */
+/* ================= USER INFO ================= */
 .dashboard-card p {
-  font-size: 28px;
+  font-size: 26px;
   color: #555;
   margin-bottom: 25px;
   line-height: 1.6;
@@ -45,15 +113,13 @@
   color: #777;
 }
 
-/* Button container */
+/* ================= BUTTONS ================= */
 .dashboard-buttons {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 20px;
 }
 
-/* Common button styles */
 .dashboard-buttons .btn {
   width: 100%;
   padding: 12px;
@@ -68,48 +134,23 @@
   color: #fff;
 }
 
-.dashboard-buttons .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Check-In button */
+/* Check-In */
 .dashboard-buttons .checkin {
-  background: #52c41a; /* green */
+  background: #52c41a;
 }
 .dashboard-buttons .checkin:hover {
   background: #389e0d;
 }
 
-/* Check-Out button */
+/* Check-Out */
 .dashboard-buttons .checkout {
-  background: #1677ff; /* blue */
+  background: #1677ff;
 }
 .dashboard-buttons .checkout:hover {
   background: #0958d9;
 }
 
-/* Simple small logout button */
-.dashboard-buttons .logout {
-  background: #ff4d4f; /* red */
-}
-.dashboard-buttons .logout:hover {
-  background: #e04344;
-}
-
-
-/* Mobile friendly */
-@media (max-width: 480px) {
-  .dashboard-card {
-    padding: 25px 20px;
-  }
-
-  .dashboard-card h1 {
-    font-size: 22px;
-  }
-}
-
-/* 🔔 Popup message */
+/* ================= POPUP MESSAGE ================= */
 .popup-message {
   position: fixed;
   top: -60px;
@@ -122,22 +163,20 @@
   color: #fff;
   font-size: 15px;
   font-weight: 500;
-  text-align: center;
 
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 
   animation: slideDown 0.5s forwards, fadeOut 0.5s forwards 2.5s;
-  z-index: 1000;
+  z-index: 1100;
 
-  background: #52c41a; /* green by default */
+  background: #52c41a;
 }
 
 .popup-message.error {
-  background: #ff4d4f; /* red for errors */
+  background: #ff4d4f;
 }
 
-/* Slide from top */
 @keyframes slideDown {
   from {
     top: -60px;
@@ -149,9 +188,73 @@
   }
 }
 
-/* Fade out */
 @keyframes fadeOut {
   to {
     opacity: 0;
+  }
+}
+
+/* ================= REACT CALENDAR ================= */
+.react-calendar {
+  border-radius: 12px;
+  padding: 10px;
+  border: none;
+}
+
+/* Calendar tiles */
+.react-calendar__tile {
+  border-radius: 55px;
+  padding: 10px 0;
+  font-weight: 500;
+}
+
+/* 🟩 PRESENT */
+.present-day {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+}
+.half-day{
+  background-color: yellow;
+  color: rgb(255, 255, 0);
+}
+/* 🟥 ABSENT */
+.absent-day {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+/* Hover */
+.present-day:hover,
+.absent-day:hover {
+  opacity: 0.9;
+}
+
+/* Remove default focus */
+.react-calendar__tile:focus {
+  background: none;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+  .dashboard-card {
+    padding: 25px 20px;
+  }
+
+  .logout-btn {
+    top: 15px;
+    right: 65px;
+    padding: 8px 14px;
+  }
+
+  .calendar-icon {
+    top: 15px;
+    right: 15px;
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+
+  .calendar-popup {
+    right: 10px;
   }
 }
