@@ -1,10 +1,12 @@
 package ampliedtech.com.attendenceApp.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,8 +94,16 @@ public class AdminController {
             throw new RuntimeException("Could not retrieve user list for page " + page, ex);
         }
     }
+
     @GetMapping("/users/search")
-    public List<UserResponse> searchUsers(@RequestParam String keyword){
+    public List<UserResponse> searchUsers(@RequestParam String keyword) {
         return userService.searchUsers(keyword);
+    }
+
+    @GetMapping("/attendance/search")
+    public List<AttendanceResponse> getUserAttendance(@RequestParam 
+         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+         LocalDate date) {
+        return userService.getUserAttendance(date);
     }
 }

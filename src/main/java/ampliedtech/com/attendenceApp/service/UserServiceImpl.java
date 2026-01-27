@@ -31,6 +31,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -190,5 +191,9 @@ public class UserServiceImpl implements UserService {
         return userRepository
                 .findByEmailContainingIgnoreCaseOrNameContainingIgnoreCase(
                         keyword, keyword);
+    }
+    @Override
+    public List<AttendanceResponse> getUserAttendance(LocalDate date){
+        return attendanceRepo.findByDate(date);
     }
 }

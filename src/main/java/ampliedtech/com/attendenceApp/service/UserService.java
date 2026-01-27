@@ -12,6 +12,7 @@ import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -34,7 +35,9 @@ public interface UserService extends UserDetailsService {
 
     Page<AttendanceResponse> getAttendance(int page, int size);
 
-   List<AllAtendanceResponse> currentUserAllAttendance();
+    List<AllAtendanceResponse> currentUserAllAttendance();
 
-   List<UserResponse> searchUsers(String keyword);
+    List<UserResponse> searchUsers(String keyword);
+
+    List<AttendanceResponse> getUserAttendance(LocalDate date);
 }

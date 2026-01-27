@@ -1,35 +1,34 @@
 import { useEffect, useState } from "react";
-import { FiSearch, FiX } from "react-icons/fi";
 import api from "../api/api";
 import { logout } from "../auth/AuthService";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
-  // ================= TAB STATE =================
   const [activePage, setActivePage] = useState(
     localStorage.getItem("ADMIN_PAGE") || "USERS"
   );
 
-  // ================= USERS STATE =================
+  // USERS
   const [users, setUsers] = useState([]);
   const [userPage, setUserPage] = useState(0);
   const [userTotalPages, setUserTotalPages] = useState(1);
   const [searchEmail, setSearchEmail] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
   const [editUser, setEditUser] = useState(null);
 
-  // ================= ATTENDANCE STATE =================
+  // Profile modal
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // ATTENDANCE
   const [attendance, setAttendance] = useState([]);
   const [attPage, setAttPage] = useState(0);
   const [attTotalPages, setAttTotalPages] = useState(1);
+  const [searchDate, setSearchDate] = useState("");
+  const [isDateSearching, setIsDateSearching] = useState(false);
+  const [isDateSearchOpen, setIsDateSearchOpen] = useState(false);
 
   // ================= USERS API =================
   const loadUsers = async (page = 0) => {
@@ -50,13 +49,11 @@ const AdminDashboard = () => {
       loadUsers(0);
       return;
     }
-
     try {
       const res = await api.get(
         `/api/admin/users/search?keyword=${encodeURIComponent(searchEmail)}`
       );
-
-      setUsers(res.data || []); // backend returns List<UserResponse>
+      setUsers(res.data || []);
       setIsSearching(true);
     } catch (err) {
       console.error("Search failed:", err);
@@ -77,6 +74,7 @@ const AdminDashboard = () => {
 
   const deleteUser = async (id) => {
     await api.delete(`/api/admin/delete/${id}`);
+    setSelectedUser(null);
     loadUsers(userPage);
   };
 
@@ -88,6 +86,7 @@ const AdminDashboard = () => {
         password: editUser.password || null,
       });
       setEditUser(null);
+      setSelectedUser(null);
       loadUsers(userPage);
     } catch (err) {
       console.error("Update failed", err);
@@ -101,20 +100,36 @@ const AdminDashboard = () => {
       setAttendance(res.data?.content || []);
       setAttPage(res.data?.pageable?.pageNumber || 0);
       setAttTotalPages(res.data?.totalPages || 1);
+      setIsDateSearching(false);
     } catch (err) {
       console.error("Error fetching attendance:", err);
       setAttendance([]);
     }
   };
 
-  // ================= LOAD DATA =================
+  const searchAttendanceByDate = async (page = 0) => {
+    if (!searchDate) {
+      loadAttendance(0);
+      return;
+    }
+    try {
+      const res = await api.get(
+        `/api/admin/attendance/search?date=${encodeURIComponent(searchDate)}`
+      );
+      setAttendance(res.data?.content || res.data || []);
+      setIsDateSearching(true);
+    } catch (err) {
+      console.error("Attendance search failed:", err);
+      setAttendance([]);
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem("ADMIN_PAGE", activePage);
     if (activePage === "USERS") loadUsers(0);
     if (activePage === "ATTENDANCE") loadAttendance(0);
   }, [activePage]);
 
-  // ================= RENDER =================
   return (
     <div className="admin-page">
       <div className="admin-card">
@@ -137,7 +152,7 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          {/* ================= USERS ================= */}
+          {/* ================= USERS PAGE ================= */}
           {activePage === "USERS" && (
             <>
               <h3>Create User</h3>
@@ -164,55 +179,14 @@ const AdminDashboard = () => {
                 <button className="btn btn-primary">Register</button>
               </form>
 
-              {editUser && (
-                <>
-                  <div className="divider" />
-                  <h3>Edit User</h3>
-                  <form className="admin-form" onSubmit={updateUser}>
+              {/* SEARCH USERS */}
+              <div className="search-box">
+                <button className="search-icon-btn" onClick={() => setIsSearchOpen(!isSearchOpen)}>
+                  🔎
+                </button>
+                {isSearchOpen && (
+                  <>
                     <input
-                      value={editUser.name}
-                      onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-                      required
-                    />
-                    <input
-                      type="password"
-                      placeholder="New Password"
-                      value={editUser.password || ""}
-                      onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
-                    />
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <button className="btn btn-primary">Update</button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => setEditUser(null)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </>
-              )}
-
-              <div className="divider" />
-
-              {/* SEARCH ICON + SEARCH BOX */}
-              <h3>Users List</h3>
-              <div className="search-container">
-                {!showSearch && (
-                  <button
-                    className="search-icon-btn"
-                    onClick={() => setShowSearch(true)}
-                    title="Search users"
-                  >
-                    <FiSearch size={20} />
-                  </button>
-                )}
-
-                {showSearch && (
-                  <div className="search-box">
-                    <input
-                      autoFocus
                       placeholder="Search by name or email"
                       value={searchEmail}
                       onChange={(e) => setSearchEmail(e.target.value)}
@@ -222,16 +196,16 @@ const AdminDashboard = () => {
                       Search
                     </button>
                     <button
-                      className="search-close-btn"
+                      className="btn btn-secondary"
                       onClick={() => {
-                        setShowSearch(false);
                         setSearchEmail("");
                         loadUsers(0);
+                        setIsSearchOpen(false);
                       }}
                     >
-                      <FiX size={18} />
+                      Clear
                     </button>
-                  </div>
+                  </>
                 )}
               </div>
 
@@ -243,30 +217,21 @@ const AdminDashboard = () => {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.length ? (
                     users.map((u) => (
-                      <tr key={u.id}>
+                      <tr key={u.id} onClick={() => setSelectedUser(u)} style={{ cursor: "pointer" }}>
                         <td>{u.id}</td>
                         <td>{u.name}</td>
                         <td>{u.email}</td>
                         <td>{u.role}</td>
-                        <td>
-                          <button className="btn btn-secondary" onClick={() => setEditUser(u)}>
-                            Edit
-                          </button>
-                          <button className="btn btn-danger" onClick={() => deleteUser(u.id)}>
-                            Delete
-                          </button>
-                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>
+                      <td colSpan="4" style={{ textAlign: "center" }}>
                         No users found
                       </td>
                     </tr>
@@ -274,7 +239,6 @@ const AdminDashboard = () => {
                 </tbody>
               </table>
 
-              {/* USERS PAGINATION */}
               {!isSearching && (
                 <div className="pagination">
                   <button
@@ -299,10 +263,50 @@ const AdminDashboard = () => {
             </>
           )}
 
-          {/* ================= ATTENDANCE ================= */}
+          {/* ================= ATTENDANCE PAGE ================= */}
           {activePage === "ATTENDANCE" && (
             <>
               <h3>Attendance Records</h3>
+
+              {/* SEARCH BY DATE */}
+              <div className="search-container">
+                <button
+                  className="search-icon-btn"
+                  onClick={() => setIsDateSearchOpen(!isDateSearchOpen)}
+                >
+                  🔍
+                </button>
+
+                {isDateSearchOpen && (
+                  <>
+                    <input
+                      type="date"
+                      value={searchDate}
+                      onChange={(e) => setSearchDate(e.target.value)}
+                      className="search-input"
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => searchAttendanceByDate(0)}
+                    >
+                      Submit
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setSearchDate("");
+                        loadAttendance(0);
+                        setIsDateSearching(false);
+                        setIsDateSearchOpen(false);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* ATTENDANCE TABLE */}
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -319,7 +323,13 @@ const AdminDashboard = () => {
                         <td>{a.userId}</td>
                         <td>{a.email}</td>
                         <td>{new Date(a.date).toLocaleDateString()}</td>
-                        <td className={a.status === "PRESENT" ? "status-present" : "status-absent"}>
+                        <td
+                          className={
+                            a.status === "PRESENT"
+                              ? "status-present"
+                              : "status-absent"
+                          }
+                        >
                           {a.status}
                         </td>
                       </tr>
@@ -334,33 +344,80 @@ const AdminDashboard = () => {
                 </tbody>
               </table>
 
-              <div className="pagination">
-                <button
-                  className="btn btn-secondary"
-                  disabled={attPage === 0}
-                  onClick={() => loadAttendance(attPage - 1)}
-                >
-                  Previous
-                </button>
-                <span>
-                  Page {attPage + 1} of {attTotalPages}
-                </span>
-                <button
-                  className="btn btn-secondary"
-                  disabled={attPage + 1 >= attTotalPages}
-                  onClick={() => loadAttendance(attPage + 1)}
-                >
-                  Next
-                </button>
-              </div>
+              {/* ATTENDANCE PAGINATION */}
+              {!isDateSearching && (
+                <div className="pagination">
+                  <button
+                    className="btn btn-secondary"
+                    disabled={attPage === 0}
+                    onClick={() => loadAttendance(attPage - 1)}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {attPage + 1} of {attTotalPages}
+                  </span>
+                  <button
+                    className="btn btn-secondary"
+                    disabled={attPage + 1 >= attTotalPages}
+                    onClick={() => loadAttendance(attPage + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
 
+      {/* LOGOUT BUTTON */}
       <button className="btn logout-btn" onClick={logout}>
         Logout
       </button>
+
+      {/* ================= PROFILE MODAL ================= */}
+      {selectedUser && (
+        <div className="profile-modal" onClick={() => setSelectedUser(null)}>
+          <div className="profile-card" onClick={(e) => e.stopPropagation()}>
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTq6Pf2w2WEjOMMLauB41tFNcCC72_U_j3lvw&s"
+              alt="Profile"
+              className="profile-photo"
+            />
+            <h3>{selectedUser.name}</h3>
+            <p><strong>ID:</strong> {selectedUser.id}</p>
+            <p><strong>Email:</strong> {selectedUser.email}</p>
+            <p><strong>Role:</strong> {selectedUser.role}</p>
+
+            {editUser && editUser.id === selectedUser.id ? (
+              <form className="admin-form" onSubmit={updateUser}>
+                <input
+                  value={editUser.name}
+                  onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={editUser.password || ""}
+                  onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+                />
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button className="btn btn-primary">Update</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setEditUser(null)}>Cancel</button>
+                </div>
+              </form>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", marginTop: "10px", justifyContent: "center" }}>
+                <button className="btn btn-secondary" onClick={() => setEditUser(selectedUser)}>Edit</button>
+                <button className="btn btn-danger" onClick={() => deleteUser(selectedUser.id)}>Delete</button>
+                <button className="btn btn-secondary" onClick={() => setSelectedUser(null)}>Close</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
