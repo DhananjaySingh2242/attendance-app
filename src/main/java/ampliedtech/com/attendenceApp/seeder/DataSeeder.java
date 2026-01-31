@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
-import ampliedtech.com.attendenceApp.repository.UserRepository;
+import ampliedtech.com.attendenceApp.jpaRepo.UserRepository;
 
 @Component
 @Profile("!test")

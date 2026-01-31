@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import ampliedtech.com.attendenceApp.document.AttendanceLog;
 import ampliedtech.com.attendenceApp.event.AttendanceEvent;
-import ampliedtech.com.attendenceApp.repository.AttendanceLogRepository;
+import ampliedtech.com.attendenceApp.mongoRepo.AttendanceLogRepository;
 import ampliedtech.com.attendenceApp.configuration.RabbitMqConfig;
 
 @Component

@@ -48,7 +48,6 @@ const UserDashboard = () => {
     }
   };
 
-  // 🔹 safer local date formatter (NO timezone bug)
   const formatDate = (date) =>
     date.toLocaleDateString("en-CA"); // yyyy-mm-dd
 
@@ -68,7 +67,7 @@ const UserDashboard = () => {
 
       <button className="logout-btn" onClick={logout}>Logout</button>
 
-      {/* 📅 Calendar Icon */}
+      {/* Calendar Icon */}
       <div
         className="calendar-icon"
         onClick={() => setShowCalendar(!showCalendar)}
@@ -77,7 +76,6 @@ const UserDashboard = () => {
         📅
       </div>
 
-      {/* 📅 Floating Calendar */}
       {showCalendar && (
         <div className="calendar-popup">
           <Calendar

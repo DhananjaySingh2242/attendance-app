@@ -17,9 +17,9 @@ import ampliedtech.com.attendenceApp.document.AttendanceSession;
 import ampliedtech.com.attendenceApp.entity.AttendanceStatus;
 import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.event.AttendanceEvent;
+import ampliedtech.com.attendenceApp.jpaRepo.UserRepository;
+import ampliedtech.com.attendenceApp.mongoRepo.AttendanceRepo;
 import ampliedtech.com.attendenceApp.publisher.AttendanceEventPublisher;
-import ampliedtech.com.attendenceApp.repository.AttendanceRepo;
-import ampliedtech.com.attendenceApp.repository.UserRepository;
 import ampliedtech.com.attendenceApp.utils.CountMillisTillMidNight;
 import jakarta.transaction.Transactional;
 

@@ -1,4 +1,4 @@
-package ampliedtech.com.attendenceApp.repository;
+package ampliedtech.com.attendenceApp.mongoRepo;
 
 import java.time.LocalDate;
 import java.util.List;
