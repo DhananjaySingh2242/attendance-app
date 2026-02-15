@@ -1,17 +1,38 @@
-export const getToken = () => localStorage.getItem("token");
+const AuthService = {
+  login: (keycloak) => {
+    if (!keycloak) return;
+    keycloak.login();
+  },
 
-export const parseJwt = (token) => {
-  const base64 = token.split(".")[1];
-  return JSON.parse(atob(base64));
+  logout: (keycloak) => {
+    if (!keycloak) return;
+
+    keycloak.logout({
+      redirectUri: window.location.origin,
+    });
+  },
+
+  isAuthenticated: (keycloak) => {
+    return Boolean(keycloak?.authenticated);
+  },
+
+  hasRole: (keycloak, role) => {
+    return (
+      keycloak?.tokenParsed?.realm_access?.roles?.includes(role) || false
+    );
+  },
+
+  isAdmin: (keycloak) => {
+    return (
+      keycloak?.tokenParsed?.realm_access?.roles?.includes("ADMIN") || false
+    );
+  },
+
+  isUser: (keycloak) => {
+    return (
+      keycloak?.tokenParsed?.realm_access?.roles?.includes("USER") || false
+    );
+  },
 };
 
-export const getRole = () => {
-  const token = getToken();
-  if (!token) return null;
-  return parseJwt(token).role;
-};
-
-export const logout = () => {
-  localStorage.removeItem("token");
-  window.location.href = "/login";
-};
+export default AuthService;

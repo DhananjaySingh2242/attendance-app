@@ -8,27 +8,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import ampliedtech.com.attendenceApp.entity.AttendanceStatus;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "attendance")
 @CompoundIndex(
     name = "unique_email_date_idx",
     def = "{'email': 1, 'date': 1}",
     unique = true
 )
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AttendanceDocument {
 @Id
 private String id;
-private Long userId;
+private String keycloakId;
 private String email;
 private LocalDate date;
 

@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AttendanceResponse {
-    private Long userId;
+    private String keycloakId;
     private String email;
     private LocalDate date;
     private AttendanceStatus status;

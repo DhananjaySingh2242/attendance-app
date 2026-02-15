@@ -13,7 +13,7 @@ import lombok.Setter;
 public class AttendanceLog {
     @Id
     private String id;
-    private Long userId;
+    private String userId;
     private String email;
     private String action;
     private LocalDateTime time;

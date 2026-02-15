@@ -1,32 +1,42 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import LoginRedirect from "./auth/LoginRedirect";
+
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./auth/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 
-function App() {
+function App({ keycloak }) {
+  if (!keycloak) return <div>Loading authentication...</div>;
+
   return (
-   <BrowserRouter>
-  <Routes>
-    <Route path="/" element={<Login />} />
-    <Route path="/login" element={<Login />} />
+    <BrowserRouter>
+      <Routes>
+        {/* After Keycloak login */}
+        <Route path="/" element={<LoginRedirect keycloak={keycloak} />} />
 
-    <Route path="/user" element={
-      <ProtectedRoute role="ROLE_USER">
-        <UserDashboard />
-      </ProtectedRoute>
-    } />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute keycloak={keycloak} role="ADMIN">
+              <AdminDashboard keycloak={keycloak} />
+            </ProtectedRoute>
+          }
+        />
 
-    <Route path="/admin" element={
-      <ProtectedRoute role="ROLE_ADMIN">
-        <AdminDashboard />
-      </ProtectedRoute>
-    } />
-  </Routes>
-</BrowserRouter>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute keycloak={keycloak} role="USER">
+              <UserDashboard keycloak={keycloak} />
+            </ProtectedRoute>
+          }
+        />
 
-
+        <Route path="/unauthorized" element={<Unauthorized />} />
+      </Routes>
+    </BrowserRouter>
   );
-  
 }
+
 export default App;

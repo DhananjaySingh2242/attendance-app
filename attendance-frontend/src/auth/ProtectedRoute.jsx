@@ -1,18 +1,16 @@
 import { Navigate } from "react-router-dom";
-import { getRole } from "./AuthService";
+import AuthService from "./AuthService";
 
-const ProtectedRoute = ({ role, children }) => {
-  const userRole = getRole();
-
-  if (!userRole) {
-    return <Navigate to="/login" />;
+const ProtectedRoute = ({ keycloak, role, children }) => {
+  if (!keycloak?.authenticated) {
+    return <Navigate to="/" replace />;
   }
 
-  if (role === "ROLE_USER" && userRole === "ROLE_ADMIN") {
-    return children;
+  if (role && !AuthService.hasRole(keycloak, role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  return userRole === role ? children : <Navigate to="/login" />;
+  return children;
 };
 
 export default ProtectedRoute;

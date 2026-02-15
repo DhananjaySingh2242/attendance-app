@@ -18,14 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
 import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
-import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
+import ampliedtech.com.attendenceApp.service.KeycloakUserService;
 import ampliedtech.com.attendenceApp.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -37,17 +36,24 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
     private final UserService userService;
+    private final KeycloakUserService keycloakUserService;
     private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, KeycloakUserService keycloakUserService) {
         this.userService = userService;
+        this.keycloakUserService = keycloakUserService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(
-            @Valid @RequestBody RegisterRequest request) {
-        log.info("Register API called for email: {}", request.getEmail());
-        return ResponseEntity.ok(userService.registerUser(request));
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+
+        if (request == null) {
+            throw new RuntimeException("RegisterRequest is null");
+        }
+
+        log.debug("Register request: {}", request);
+        keycloakUserService.registerUser(request);
+        return ResponseEntity.ok("User registerd successful");
     }
 
     @GetMapping("/all-users")
@@ -101,9 +107,8 @@ public class AdminController {
     }
 
     @GetMapping("/attendance/search")
-    public List<AttendanceResponse> getUserAttendance(@RequestParam 
-         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-         LocalDate date) {
+    public List<AttendanceResponse> getUserAttendance(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return userService.getUserAttendance(date);
     }
 }

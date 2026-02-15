@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import ampliedtech.com.attendenceApp.service.AttendenceService;
 
@@ -26,9 +28,9 @@ public class AttendenceController {
     }
 
     @PostMapping("/check-in")
-    public ResponseEntity<String> checkIn(Authentication authentication) {
+    public ResponseEntity<?> checkIn(@AuthenticationPrincipal Jwt jwt) {
         try {
-            attendenceService.checkIn(authentication.getName());
+            attendenceService.checkIn(jwt);
             log.info("Check-In API called");
             return ResponseEntity.ok("Check-In successfully");
         } catch (DataIntegrityViolationException ex) {
@@ -37,8 +39,8 @@ public class AttendenceController {
     }
 
     @PostMapping("/check-out")
-    public ResponseEntity<String> checkOut(Authentication authentication) {
-        attendenceService.checkOut(authentication.getName());
+    public ResponseEntity<?> checkOut(@AuthenticationPrincipal Jwt jwt) {
+        attendenceService.checkOut(jwt);
         log.info("Check-out successful");
         return ResponseEntity.ok("Checked out successfully");
     }

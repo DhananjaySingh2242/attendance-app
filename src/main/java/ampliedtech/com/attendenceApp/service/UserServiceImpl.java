@@ -1,25 +1,20 @@
 package ampliedtech.com.attendenceApp.service;
 
 import ampliedtech.com.attendenceApp.document.AttendanceDocument;
-import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.jpaRepo.UserRepository;
 import ampliedtech.com.attendenceApp.mapper.GetAttendanceMapper;
-import ampliedtech.com.attendenceApp.mapper.GetUserMapper;
 import ampliedtech.com.attendenceApp.mapper.UserResMapper;
 import ampliedtech.com.attendenceApp.mongoRepo.AttendanceRepo;
-import ampliedtech.com.attendenceApp.requestDto.LoginRequest;
-import ampliedtech.com.attendenceApp.requestDto.RegisterRequest;
 import ampliedtech.com.attendenceApp.requestDto.UpdateRequest;
 import ampliedtech.com.attendenceApp.responseDto.AllAtendanceResponse;
 import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
-import ampliedtech.com.attendenceApp.responseDto.AuthResponse;
 import ampliedtech.com.attendenceApp.responseDto.DeleteResponse;
-import ampliedtech.com.attendenceApp.responseDto.RegisterResponse;
 import ampliedtech.com.attendenceApp.responseDto.UpdateResponse;
 import ampliedtech.com.attendenceApp.responseDto.UserResponse;
-import ampliedtech.com.attendenceApp.security.JwtUtil;
-
+import ampliedtech.com.attendenceApp.utils.KeyclaokRoleUtil;
+import ampliedtech.com.attendenceApp.configuration.KeycloakAdminConfig;
+import org.springframework.security.core.Authentication;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,8 +24,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-
+import ampliedtech.com.attendenceApp.mapper.GetUserMapper;
+import org.keycloak.admin.client.Keycloak;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,16 +40,19 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final AttendanceRepo attendanceRepo;
-    private final JwtUtil jwtUtil;
+   private final KeyclaokRoleUtil roleUtil;
+   private final Keycloak keycloak;
+   // private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(@Lazy UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-            AttendanceRepo attendanceRepo) {
+    public UserServiceImpl(@Lazy UserRepository userRepository, 
+            AttendanceRepo attendanceRepo,KeyclaokRoleUtil roleUtil,
+        Keycloak keycloak) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
+      //  this.jwtUtil = jwtUtil;
         this.attendanceRepo = attendanceRepo;
+        this.roleUtil = roleUtil;
+        this.keycloak = keycloak;
     }
 
     @Override
@@ -62,80 +62,27 @@ public class UserServiceImpl implements UserService {
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().name().replace("ROLE_", ""))
                 .build();
     }
+    
 
     @Override
-    public RegisterResponse registerUser(RegisterRequest request) {
-        log.info("Attempting to register user with email: {}", request.getEmail());
-        if (userRepository.findByEmail(request.getEmail().trim()).isPresent()) {
-            log.warn("Registration failed. Email already exists: {}",
-                    request.getEmail());
-            throw new RuntimeException("Email already registered");
+    public DeleteResponse deleteUser(Long id){
+        User user = userRepository.findById(id)
+        .orElseThrow(()->
+    new RuntimeException("User with Id" + id + "does not exist"));
+     try {
+            keycloak.realm("keycloak-demo")
+                    .users()
+                    .get(user.getKeycloakId())
+                    .remove();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete user from Keycloak", e);
         }
-        User user = new User();
-        user.setEmail(request.getEmail().trim());
-        user.setName(request.getName());
-        user.setRole(Role.ROLE_USER);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        try {
-            User savedUser = userRepository.save(user);
-            log.info("User registered successfully with email: {}",
-                    request.getEmail());
-
-            RegisterResponse response = new RegisterResponse();
-            response.setUserId(savedUser.getId());
-            response.setMessage("User registered successfully");
-            response.setTimestamp(LocalDateTime.now());
-            return response;
-        } catch (Exception ex) {
-            log.error("Error while registering user with email: {}",
-                    request.getEmail(), ex);
-            throw ex;
-        }
-    }
-
-    @Override
-    public AuthResponse loginUser(LoginRequest request) {
-        log.info("Login attempt for email: {}", request.getEmail());
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    log.warn("Login failed. User not found: {}",
-                            request.getEmail());
-                    return new RuntimeException("Invalid credentials");
-                });
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        String token = jwtUtil.generateToken(user);
-        log.info("Login successful for email: {}", request.getEmail());
-        return new AuthResponse(token);
-    }
-
-    @Override
-    public UserResponse getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User Not found"));
-        return new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole());
-    }
-
-    @Override
-    public DeleteResponse deleteUser(Long id) {
-        log.warn("Deleting user with ID: {}", id);
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Error: User with ID " + id + " does not exist.");
-        }
-        userRepository.deleteById(id);
-        return new DeleteResponse(id, "User Deleted", LocalDateTime.now());
+        userRepository.delete(user);
+        return new DeleteResponse(id, 
+            "User deleted from keycloak and db", 
+        LocalDateTime.now());
     }
 
     @Override
@@ -145,10 +92,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         if (updateData.getName() != null && !updateData.getName().isEmpty()) {
             user.setName(updateData.getName());
-        }
-
-        if (updateData.getPassword() != null && !updateData.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(updateData.getPassword()));
         }
         User savedUser = userRepository.save(user);
         return UserResMapper.toDto(savedUser);
@@ -184,6 +127,52 @@ public class UserServiceImpl implements UserService {
                         attendance.getStatus()))
                 .toList();
     }
+    @Override
+public void ensureUserExists(Jwt jwt) {
+
+    String keycloakId = jwt.getSubject();
+    String email = jwt.getClaimAsString("email");
+
+    userRepository.findByKeycloakId(keycloakId)
+        .orElseGet(() -> {
+            User user = new User();
+            user.setKeycloakId(keycloakId);
+            user.setEmail(email);
+            user.setName(jwt.getClaimAsString("name"));
+            return userRepository.save(user);
+        });
+}
+
+@Override
+public UserResponse getCurrentUser() {
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (!(auth.getPrincipal() instanceof Jwt jwt)) {
+        throw new RuntimeException("Invalid authentication");
+    }
+
+    // 🔑 1️⃣ Extract from token
+    String keycloakUserId = jwt.getSubject();
+    String email = jwt.getClaimAsString("email");
+
+    // 👤 2️⃣ Find or create user
+    User user = userRepository.findByKeycloakId(keycloakUserId)
+            .orElseGet(() -> {
+                User newUser = new User();
+                newUser.setKeycloakId(keycloakUserId);   // ✅ INSERTED HERE
+                newUser.setEmail(email);
+                newUser.setName(jwt.getClaimAsString("name"));
+                return userRepository.save(newUser);
+            });
+
+    // 📤 3️⃣ Return response
+    return new UserResponse(
+            user.getKeycloakId(),
+            user.getEmail(),
+            user.getName(),
+            roleUtil.extractRoles(jwt)
+    );
+}
 
     @Override
     public List<UserResponse> searchUsers(String keyword) {

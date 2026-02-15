@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   List<UserResponse> findByEmailContainingIgnoreCaseOrNameContainingIgnoreCase(String email,
       String name);
+
+  Optional<User> findByKeycloakId(String keycloakId);
 }

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import api from "../api/api";
-import { logout } from "../auth/AuthService";
 import "./UserDashboard.css";
+import AuthService from "../auth/AuthService";
 
-const UserDashboard = () => {
+const UserDashboard = ({ keycloak }) => {
   const [user, setUser] = useState(null);
   const [attendance, setAttendance] = useState([]);
   const [message, setMessage] = useState("");
@@ -48,12 +48,10 @@ const UserDashboard = () => {
     }
   };
 
-  const formatDate = (date) =>
-    date.toLocaleDateString("en-CA"); // yyyy-mm-dd
+  const formatDate = (date) => date.toLocaleDateString("en-CA"); // yyyy-mm-dd
 
   const attendanceMap = attendance.reduce((acc, item) => {
-    console.log(item.status, "stat")
-    acc[item.date] = item.status.slice(0,1);
+    acc[item.date] = item.status.slice(0, 1);
     return acc;
   }, {});
 
@@ -65,7 +63,13 @@ const UserDashboard = () => {
         </div>
       )}
 
-      <button className="logout-btn" onClick={logout}>Logout</button>
+      {/* ✅ FIXED LOGOUT */}
+      <button
+        className="logout-btn"
+        onClick={() => AuthService.logout(keycloak)}
+      >
+        Logout
+      </button>
 
       {/* Calendar Icon */}
       <div
@@ -110,8 +114,12 @@ const UserDashboard = () => {
         )}
 
         <div className="dashboard-buttons">
-          <button className="btn checkin" onClick={handleCheckIn}>Check-In</button>
-          <button className="btn checkout" onClick={handleCheckOut}>Check-Out</button>
+          <button className="btn checkin" onClick={handleCheckIn}>
+            Check-In
+          </button>
+          <button className="btn checkout" onClick={handleCheckOut}>
+            Check-Out
+          </button>
         </div>
       </div>
     </div>

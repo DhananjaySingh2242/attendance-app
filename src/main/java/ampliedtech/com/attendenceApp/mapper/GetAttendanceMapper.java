@@ -6,7 +6,7 @@ import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 public class GetAttendanceMapper {
     private GetAttendanceMapper(){}
     public static AttendanceResponse toDto(AttendanceDocument attendanceDocument){
-        return new AttendanceResponse(attendanceDocument.getUserId(), attendanceDocument.getEmail(),
+        return new AttendanceResponse(attendanceDocument.getKeycloakId(), attendanceDocument.getEmail(),
         attendanceDocument.getDate(),attendanceDocument.getStatus());
     }
 }

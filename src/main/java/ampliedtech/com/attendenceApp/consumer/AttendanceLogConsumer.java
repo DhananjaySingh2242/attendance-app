@@ -22,7 +22,7 @@ public class AttendanceLogConsumer {
     @RabbitListener(queues = RabbitMqConfig.LOG_QUEUE)
     public void consume(AttendanceEvent event) {
         AttendanceLog attendanceLog = new AttendanceLog();
-        attendanceLog.setUserId(event.getId());
+        attendanceLog.setUserId(event.getKeycloakId());
         attendanceLog.setEmail(event.getEmail());
         attendanceLog.setAction(event.getAction());
         attendanceLog.setTime(event.getTime());

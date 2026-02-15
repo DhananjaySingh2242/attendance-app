@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import { logout } from "../auth/AuthService";
+import AuthService from "../auth/AuthService";
 import "./AdminDashboard.css";
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ keycloak }) => {
   const [activePage, setActivePage] = useState(
     localStorage.getItem("ADMIN_PAGE") || "USERS"
   );
@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   const [isDateSearching, setIsDateSearching] = useState(false);
   const [isDateSearchOpen, setIsDateSearchOpen] = useState(false);
 
-  // ================= USERS API =================
+  // USERS API 
   const loadUsers = async (page = 0) => {
     try {
       const res = await api.get(`/api/admin/all-users?page=${page}&size=10`);
@@ -93,7 +93,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // ================= ATTENDANCE API =================
+  // ATTENDANCE API 
   const loadAttendance = async (page = 0) => {
     try {
       const res = await api.get(`/api/admin/all-attendance?page=${page}&size=10`);
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          {/* ================= USERS PAGE ================= */}
+        {/* USERS PAGE  */}
           {activePage === "USERS" && (
             <>
               <h3>Create User</h3>
@@ -372,7 +372,10 @@ const AdminDashboard = () => {
       </div>
 
       {/* LOGOUT BUTTON */}
-      <button className="btn logout-btn" onClick={logout}>
+         <button
+        className="btn logout-btn"
+        onClick={() => AuthService.logout(keycloak)}
+      >
         Logout
       </button>
 

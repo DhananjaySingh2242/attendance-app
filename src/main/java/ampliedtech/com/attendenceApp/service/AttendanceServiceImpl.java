@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +15,17 @@ import org.slf4j.LoggerFactory;
 import ampliedtech.com.attendenceApp.document.AttendanceDocument;
 import ampliedtech.com.attendenceApp.document.AttendanceSession;
 import ampliedtech.com.attendenceApp.entity.AttendanceStatus;
+import ampliedtech.com.attendenceApp.entity.Role;
 import ampliedtech.com.attendenceApp.entity.User;
 import ampliedtech.com.attendenceApp.event.AttendanceEvent;
 import ampliedtech.com.attendenceApp.jpaRepo.UserRepository;
 import ampliedtech.com.attendenceApp.mongoRepo.AttendanceRepo;
 import ampliedtech.com.attendenceApp.publisher.AttendanceEventPublisher;
 import ampliedtech.com.attendenceApp.utils.CountMillisTillMidNight;
+import ampliedtech.com.attendenceApp.utils.ValidUserRole;
+
+import org.springframework.security.oauth2.jwt.Jwt;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -30,26 +35,42 @@ public class AttendanceServiceImpl implements AttendenceService {
     private final AttendanceRepo attendanceRepo;
     private final StringRedisTemplate redisTemplate;
     private final AttendanceEventPublisher attendanceEventPublisher;
+    private final ValidUserRole validUserRole;
 
     public AttendanceServiceImpl(AttendanceRepo attendanceRepo, UserRepository userRepository,
             StringRedisTemplate redisTemplate,
-            AttendanceEventPublisher attendanceEventPublisher) {
+            AttendanceEventPublisher attendanceEventPublisher,
+            ValidUserRole validUserRole) {
         this.attendanceRepo = attendanceRepo;
         this.userRepository = userRepository;
         this.redisTemplate = redisTemplate;
         this.attendanceEventPublisher = attendanceEventPublisher;
+        this.validUserRole = validUserRole;
     }
 
     @Override
     @Transactional
-    public void checkIn(String email) {
+    public void checkIn(@AuthenticationPrincipal Jwt jwt) {
+        validUserRole.validateUserRole(jwt);
 
-        log.info("Check-in attempt for user: {}", email);
+        String keycloakId = jwt.getSubject();
+        String email = jwt.getClaimAsString("email");
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
+        // Extract role from JWT and convert to enum
+        String roleStr = validUserRole.extractPrimaryRole(jwt);
+        final Role role = safeRole(roleStr);
 
-        String redisKey = "attendance:active:" + user.getId();
+        // Ensure user exists in DB
+        User user = userRepository.findByKeycloakId(keycloakId)
+                .orElseGet(() -> {
+                    User u = new User();
+                    u.setKeycloakId(keycloakId);
+                    u.setEmail(email);
+                    u.setRole(role);
+                    return userRepository.save(u);
+                });
+
+        String redisKey = "attendance:active:" + user.getKeycloakId();
 
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
             throw new RuntimeException("Already checked in");
@@ -72,10 +93,10 @@ public class AttendanceServiceImpl implements AttendenceService {
         LocalDate today = LocalDate.now();
 
         AttendanceDocument attendance = attendanceRepo
-                .findByEmailAndDate(user.getEmail(), today)
+                .findByKeycloakIdAndDate(keycloakId, today)
                 .orElse(
                         AttendanceDocument.builder()
-                                .userId(user.getId())
+                                .keycloakId(user.getKeycloakId())
                                 .email(user.getEmail())
                                 .date(today)
                                 .sessions(new ArrayList<>())
@@ -91,7 +112,7 @@ public class AttendanceServiceImpl implements AttendenceService {
         attendanceRepo.save(attendance);
 
         AttendanceEvent event = new AttendanceEvent();
-        event.setId(user.getId());
+        event.setKeycloakId(user.getKeycloakId());
         event.setEmail(user.getEmail());
         event.setAction("CHECK_IN");
         event.setTime(LocalDateTime.now());
@@ -102,12 +123,15 @@ public class AttendanceServiceImpl implements AttendenceService {
 
     @Override
     @Transactional
-    public void checkOut(String email) {
+    public void checkOut(@AuthenticationPrincipal Jwt jwt) {
+        validUserRole.validateUserRole(jwt);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String keycloakId = jwt.getSubject();
+        String email = jwt.getClaimAsString("email");
 
-        String redisKey = "attendance:active:" + user.getId();
+        log.info("Check-out attempt for keycloakId={}", keycloakId);
+
+        String redisKey = "attendance:active:" + keycloakId;
 
         String checkInTimeStr = redisTemplate.opsForValue().get(redisKey);
         if (checkInTimeStr == null) {
@@ -118,32 +142,29 @@ public class AttendanceServiceImpl implements AttendenceService {
         LocalDateTime checkOutTime = LocalDateTime.now();
 
         AttendanceDocument attendance = attendanceRepo
-                .findByEmailAndDate(user.getEmail(), LocalDate.now())
+                .findByKeycloakIdAndDate(keycloakId, LocalDate.now())
                 .orElseThrow(() -> new RuntimeException("Attendance not found"));
 
         AttendanceSession lastSession = attendance.getSessions().get(attendance.getSessions().size() - 1);
-
         lastSession.setCheckOut(checkOutTime);
 
         long minutes = Duration.between(checkInTime, checkOutTime).toMinutes();
         lastSession.setDurationMinutes(minutes);
 
-        attendance.setTotalDurationMinutes(
-                attendance.getTotalDurationMinutes() + minutes);
-
+        attendance.setTotalDurationMinutes(attendance.getTotalDurationMinutes() + minutes);
         attendance.setStatus(calculateStatus(attendance.getTotalDurationMinutes()));
-        attendanceRepo.save(attendance);
 
+        attendanceRepo.save(attendance);
         redisTemplate.delete(redisKey);
 
         AttendanceEvent event = new AttendanceEvent();
-        event.setId(user.getId());
-        event.setEmail(user.getEmail());
-        event.setAction("CHECK-OUT");
+        event.setKeycloakId(keycloakId);
+        event.setEmail(email);
+        event.setAction("CHECK_OUT");
         event.setTime(checkOutTime);
 
         attendanceEventPublisher.publish(event);
-        log.info("Check-out successful for {}", email);
+        log.info("Check-out successful for keycloakId={}", keycloakId);
     }
 
     private AttendanceStatus calculateStatus(long totalMinutes) {
@@ -152,5 +173,13 @@ public class AttendanceServiceImpl implements AttendenceService {
         if (totalMinutes <= 240)
             return AttendanceStatus.HALFDAY;
         return AttendanceStatus.PRESENT;
+    }
+
+    private Role safeRole(String roleStr) {
+        try {
+            return Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            return Role.ROLE_USER;
+        }
     }
 }

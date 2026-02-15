@@ -1,0 +1,64 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: attendenceApp
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: Ansh@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: attendance
+      repositories:
+        enabled: true
+
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/keycloak-demo
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        security: DEBUG
+        security.oauth2: DEBUG
+
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: keycloak-demo
+  admin:
+    client-id: attendance-admin-client
+    client-secret: IYHbzch2E3Dxpl6oe10SW0Oben5KD4Mf
+

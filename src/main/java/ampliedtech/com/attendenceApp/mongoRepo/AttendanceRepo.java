@@ -14,7 +14,7 @@ import ampliedtech.com.attendenceApp.responseDto.AttendanceResponse;
 
 @Repository
 public interface AttendanceRepo extends MongoRepository<AttendanceDocument, String> {
-    Optional<AttendanceDocument> findByEmailAndDate(String email, LocalDate date);
+    Optional<AttendanceDocument> findByKeycloakIdAndDate(String keycloakId, LocalDate date);
     Page<AttendanceDocument> findByEmailAndDate(String email,Pageable pageable);
     List<AttendanceDocument>findAllByEmailOrderByDateDesc(String email);
     List<AttendanceResponse>findByDate(LocalDate date);
