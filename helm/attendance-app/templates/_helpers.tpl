@@ -30,10 +30,8 @@ app: attendance-app
 {{- end }}
 
 {{/*
-Selector labels
+Selector labels (must be immutable after first deploy - do not add new labels here)
 */}}
 {{- define "attendance-app.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "attendance-app.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 app: attendance-app
 {{- end }}
