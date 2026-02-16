@@ -1,0 +1,31 @@
+# Default values for attendance-app
+replicaCount: 1
+
+image:
+  repository: dhananjaysingh/attendance-app
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8081
+  nodePort: 30007
+
+# Optional: override app name/labels
+nameOverride: ""
+fullnameOverride: ""
+
+# Secrets for env (existing k8s secret)
+existingSecret:
+  name: db-secret
+  mysqlPasswordKey: mysql-password
+
+# Extra env vars (optional)
+extraEnv: []
+#  - name: KEY
+#    value: value
+#  - name: KEY_FROM_SECRET
+#    valueFrom:
+#      secretKeyRef:
+#        name: secret-name
+#        key: key-name

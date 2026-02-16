@@ -1,0 +1,25 @@
+# ArgoCD Application for attendance-app (Helm)
+# Replace repoURL with your GitHub repo if different, then: kubectl apply -f argocd/application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: attendance-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dhananjaysingh/attendanceApp.git
+    targetRevision: main
+    path: helm/attendance-app
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
