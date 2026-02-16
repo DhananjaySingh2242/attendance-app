@@ -15,7 +15,15 @@ service:
 nameOverride: ""
 fullnameOverride: ""
 
-# Secrets for env (existing k8s secret)
+# MySQL / Spring datasource (app connects to Service "mysql" in cluster)
+spring:
+  datasource:
+    url: "jdbc:mysql://mysql:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    username: attendance
+  jpa:
+    databasePlatform: org.hibernate.dialect.MySQLDialect
+
+# Secrets for env (existing k8s secret) - used for SPRING_DATASOURCE_PASSWORD
 existingSecret:
   name: db-secret
   mysqlPasswordKey: mysql-password

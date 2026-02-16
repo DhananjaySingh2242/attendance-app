@@ -18,16 +18,24 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
-            - name: MYSQL_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.spring.datasource.url | quote }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.spring.datasource.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.existingSecret.name }}
                   key: {{ .Values.existingSecret.mysqlPasswordKey }}
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: {{ .Values.spring.jpa.databasePlatform | quote }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
