@@ -1,6 +1,5 @@
 package ampliedtech.com.attendenceApp.controller;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +16,6 @@ import ampliedtech.com.attendenceApp.service.AttendenceService;
 
 @RestController
 @RequestMapping("/api/attendance")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AttendenceController {
     private static final Logger log = LoggerFactory.getLogger(AttendenceController.class);
 

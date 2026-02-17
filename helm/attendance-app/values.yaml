@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: dhananjaysingh/attendance-app
+  repository: DhananjaySingh2242/attendance-app
   tag: "1.0"
   pullPolicy: IfNotPresent
 
@@ -27,6 +27,14 @@ spring:
 existingSecret:
   name: db-secret
   mysqlPasswordKey: mysql-password
+
+# Keycloak (required by KeycloakUserService; set to empty or disable if not using Keycloak)
+keycloak:
+  authServerUrl: "http://keycloak:8080"
+  realm: "keycloak-demo"
+  admin:
+    clientId: "attendance-admin-client"
+    clientSecret: ""  # set via existingSecret or extraEnv in production
 
 # Extra env vars (optional)
 extraEnv: []

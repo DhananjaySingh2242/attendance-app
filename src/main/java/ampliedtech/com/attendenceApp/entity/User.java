@@ -28,6 +28,6 @@ public class User {
   @Column(unique = true)
   private String email;
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "varchar(20)")
   private Role role;
 }

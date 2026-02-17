@@ -29,11 +29,8 @@ import ampliedtech.com.attendenceApp.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
     private final UserService userService;
     private final KeycloakUserService keycloakUserService;

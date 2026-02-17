@@ -27,8 +27,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth -> auth
-                // 🔑 Allow preflight requests
+                // 🔑 Allow preflight and health (no auth)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/health").permitAll()
 
                 // secured endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -63,15 +64,16 @@ public class SecurityConfig {
                 }
             }
 
-            // realm roles → ROLE_USER, ROLE_ADMIN
+            // realm roles → ROLE_USER, ROLE_ADMIN (Keycloak often uses "user"/"admin" lowercase)
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
             if (realmAccess != null) {
                 Object roles = realmAccess.get("roles");
                 if (roles instanceof Collection<?> roleList) {
                     for (Object role : roleList) {
-                        authorities.add(
-                            new SimpleGrantedAuthority("ROLE_" + role)
-                        );
+                        String r = role == null ? "" : String.valueOf(role).toUpperCase();
+                        if (!r.isEmpty()) {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_" + r));
+                        }
                     }
                 }
             }

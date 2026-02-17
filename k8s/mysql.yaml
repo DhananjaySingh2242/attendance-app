@@ -9,6 +9,17 @@ spec:
     requests:
       storage: 1Gi
 ---
+# Creates user 'attendance' so the app (application.yml) can connect
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init
+data:
+  init-attendance-user.sql: |
+    CREATE USER IF NOT EXISTS 'attendance'@'%' IDENTIFIED BY 'Ansh@123';
+    GRANT ALL PRIVILEGES ON attendance.* TO 'attendance'@'%';
+    FLUSH PRIVILEGES;
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,10 +50,15 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
             claimName: mysql-pvc
+        - name: mysql-init
+          configMap:
+            name: mysql-init
 ---
 apiVersion: v1
 kind: Service

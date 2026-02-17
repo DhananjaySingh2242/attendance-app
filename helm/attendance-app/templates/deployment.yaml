@@ -20,6 +20,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+            - --keycloak.auth-server-url={{ .Values.keycloak.authServerUrl | quote }}
+            - --keycloak.realm={{ .Values.keycloak.realm | quote }}
+            - --keycloak.admin.client-id={{ .Values.keycloak.admin.clientId | quote }}
+            - --keycloak.admin.client-secret={{ .Values.keycloak.admin.clientSecret | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -36,6 +40,14 @@ spec:
                   key: {{ .Values.existingSecret.mysqlPasswordKey }}
             - name: SPRING_JPA_DATABASE_PLATFORM
               value: {{ .Values.spring.jpa.databasePlatform | quote }}
+            - name: KEYCLOAK_AUTH_SERVER_URL
+              value: {{ .Values.keycloak.authServerUrl | quote }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.keycloak.realm | quote }}
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: {{ .Values.keycloak.admin.clientId | quote }}
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: {{ .Values.keycloak.admin.clientSecret | quote }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
