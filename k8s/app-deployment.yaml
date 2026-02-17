@@ -15,11 +15,26 @@ spec:
       containers:
         - name: attendance-app
           image: dhananjaysingh/attendance-app:1.0
+          imagePullPolicy: IfNotPresent   # use Never when image is loaded locally (e.g. kind load / minikube)
           ports:
             - containerPort: 8081
           env:
-            - name: MYSQL_PASSWORD
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-secret
                   key: mysql-password
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8081
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3

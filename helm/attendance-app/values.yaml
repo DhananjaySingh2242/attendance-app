@@ -36,6 +36,17 @@ keycloak:
     clientId: "attendance-admin-client"
     clientSecret: ""  # set via existingSecret or extraEnv in production
 
+# Probes (readiness/liveness) - adjust if app starts slowly
+probes:
+  readiness:
+    initialDelaySeconds: 50
+    periodSeconds: 10
+    failureThreshold: 6
+  liveness:
+    initialDelaySeconds: 70
+    periodSeconds: 15
+    failureThreshold: 3
+
 # Extra env vars (optional)
 extraEnv: []
 #  - name: KEY
