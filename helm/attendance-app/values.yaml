@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: dhananjaysingh/attendance-app
+  repository: dhananjaysingh2242/attendance-app
   tag: "1.0"
   pullPolicy: IfNotPresent
 
