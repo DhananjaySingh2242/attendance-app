@@ -75,6 +75,18 @@
   border-color: #1677ff;
 }
 
+.form-error {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  color: #cf1322;
+  font-size: 13px;
+}
+.form-error p { margin-bottom: 4px; }
+.form-error ul { margin: 0; padding-left: 18px; }
+
 /* ================= BUTTONS ================= */
 .btn {
   padding: 8px 16px;

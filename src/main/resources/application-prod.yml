@@ -1,0 +1,39 @@
+# Production profile. All secrets MUST come from environment variables.
+# Use: spring.profiles.active=prod and set DB_PASSWORD, KEYCLOAK_ADMIN_*, etc.
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DATABASE:attendance}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
+  realm: ${KEYCLOAK_REALM}
+  admin:
+    realm: ${KEYCLOAK_ADMIN_REALM:master}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+    username: ${KEYCLOAK_ADMIN_USERNAME}
+    password: ${KEYCLOAK_ADMIN_PASSWORD}
+
+app:
+  cors:
+    # In production, set env CORS_ALLOWED_ORIGINS to your frontend URL(s), e.g. https://your-app.com (comma-separated for multiple).
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS}

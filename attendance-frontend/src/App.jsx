@@ -33,7 +33,7 @@ function App({ keycloak }) {
           }
         />
 
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/unauthorized" element={<Unauthorized keycloak={keycloak} />} />
       </Routes>
     </BrowserRouter>
   );

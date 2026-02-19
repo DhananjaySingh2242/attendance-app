@@ -16,9 +16,9 @@
 
     <!-- PROJECT INFO -->
     <groupId>ampliedtech.com</groupId>
-    <artifactId>attendenceApp</artifactId>
+    <artifactId>attendanceApp</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>attendenceApp</name>
+    <name>attendanceApp</name>
     <description>Attendance Management Application</description>
 
     <!-- PROPERTIES -->
@@ -98,6 +98,12 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
+        <!-- ACTUATOR (health, metrics) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- LOGGING -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -118,6 +124,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 

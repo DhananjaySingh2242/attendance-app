@@ -1,17 +1,11 @@
-# Use this profile when running the backend locally (same machine as frontend + Keycloak).
-# Run: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
-# Or set active profile in IDE to "local".
-#
-# Prerequisites:
-# - MySQL on localhost:3306 with database "attendance" and user attendance/Ansh@123 (or port-forward from cluster)
-# - Keycloak on localhost:8080 with realm keycloak-demo
-# - RabbitMQ, Redis, MongoDB on localhost (or port-forward from cluster) if the app needs them
+# Profile: local. Run with -Dspring-boot.run.profiles=local
+# Prerequisites: MySQL, Keycloak, MongoDB, Redis, RabbitMQ on localhost.
 
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: attendance
-    password: Ansh@123
+    password: ${DB_PASSWORD:Ansh@123}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,15 +13,9 @@ spring:
     mongodb:
       host: localhost
       port: 27017
-      database: attendance
-    redis:
-      host: localhost
-      port: 6379
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
   security:
     oauth2:
       resourceserver:
@@ -39,4 +27,8 @@ keycloak:
   realm: keycloak-demo
   admin:
     client-id: attendance-admin-client
-    client-secret: CHANGE_ME  # paste your attendance-admin-client secret from Keycloak
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:CHANGE_ME}
+
+app:
+  cors:
+    allowed-origin-patterns: "http://localhost:*,http://127.0.0.1:*"

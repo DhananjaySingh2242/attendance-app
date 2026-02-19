@@ -17,21 +17,17 @@ const AuthService = {
   },
 
   hasRole: (keycloak, role) => {
-    return (
-      keycloak?.tokenParsed?.realm_access?.roles?.includes(role) || false
-    );
+    const roles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const target = (role || "").toUpperCase();
+    return roles.some((r) => String(r).toUpperCase() === target);
   },
 
   isAdmin: (keycloak) => {
-    return (
-      keycloak?.tokenParsed?.realm_access?.roles?.includes("ADMIN") || false
-    );
+    return AuthService.hasRole(keycloak, "ADMIN");
   },
 
   isUser: (keycloak) => {
-    return (
-      keycloak?.tokenParsed?.realm_access?.roles?.includes("USER") || false
-    );
+    return AuthService.hasRole(keycloak, "USER");
   },
 };
 

@@ -30,21 +30,28 @@ const UserDashboard = ({ keycloak }) => {
     setTimeout(() => setShowMessage(false), 3000);
   };
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err.response?.data;
+    if (!data) return fallback;
+    if (typeof data === "string") return data;
+    return data.message || fallback;
+  };
+
   const handleCheckIn = async () => {
     try {
       const res = await api.post("/api/attendance/check-in");
-      showPopup(res.data, "success");
+      showPopup(res.data ?? "Check-In successfully", "success");
     } catch (err) {
-      showPopup(err.response?.data || "Check-In failed", "error");
+      showPopup(getErrorMessage(err, "Check-In failed"), "error");
     }
   };
 
   const handleCheckOut = async () => {
     try {
       const res = await api.post("/api/attendance/check-out");
-      showPopup(res.data, "success");
+      showPopup(res.data ?? "Checked out successfully", "success");
     } catch (err) {
-      showPopup(err.response?.data || "Check-Out failed", "error");
+      showPopup(getErrorMessage(err, "Check-Out failed"), "error");
     }
   };
 

@@ -16,8 +16,15 @@ const AdminDashboard = ({ keycloak }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
+  const [newUser, setNewUser] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
+  const [registerError, setRegisterError] = useState(null);
   const [editUser, setEditUser] = useState(null);
+  const [updateError, setUpdateError] = useState(null);
 
   // Profile modal
   const [selectedUser, setSelectedUser] = useState(null);
@@ -33,10 +40,13 @@ const AdminDashboard = ({ keycloak }) => {
   // USERS API 
   const loadUsers = async (page = 0) => {
     try {
-      const res = await api.get(`/api/admin/all-users?page=${page}&size=10`);
-      setUsers(res.data?.content || []);
-      setUserPage(res.data?.pageable?.pageNumber || 0);
-      setUserTotalPages(res.data?.totalPages || 1);
+      const res = await api.get(`/api/admin/all-users?page=${page}&size=20`);
+      const data = res.data || {};
+      const content = Array.isArray(data.content) ? data.content : [];
+      setUsers(content);
+      const pageNum = data.number ?? data.pageable?.pageNumber ?? page;
+      setUserPage((typeof pageNum === "number" && !isNaN(pageNum)) ? pageNum : 0);
+      setUserTotalPages(Math.max(1, data.totalPages ?? 1));
       setIsSearching(false);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -63,12 +73,29 @@ const AdminDashboard = ({ keycloak }) => {
 
   const registerUser = async (e) => {
     e.preventDefault();
+    setRegisterError(null);
     try {
-      await api.post("/api/admin/register", newUser);
-      setNewUser({ name: "", email: "", password: "" });
-      loadUsers(userPage);
+      await api.post("/api/admin/register", {
+        email: newUser.email,
+        password: newUser.password,
+        firstName: newUser.firstName || undefined,
+        lastName: newUser.lastName || undefined,
+        username: newUser.email,
+      });
+      setNewUser({ email: "", password: "", firstName: "", lastName: "" });
+      loadUsers(0);
     } catch (err) {
-      console.error("User registration failed", err);
+      const data = err.response?.data;
+      if (data?.message && (data?.details || data?.errorCode)) {
+        setRegisterError({
+          message: data.message,
+          details: data.details,
+        });
+      } else {
+        setRegisterError({
+          message: typeof data === "string" ? data : data?.message || "Registration failed",
+        });
+      }
     }
   };
 
@@ -80,16 +107,28 @@ const AdminDashboard = ({ keycloak }) => {
 
   const updateUser = async (e) => {
     e.preventDefault();
+    setUpdateError(null);
     try {
       await api.patch(`/api/admin/update/${editUser.id}`, {
         name: editUser.name,
-        password: editUser.password || null,
+        password: editUser.password,
       });
       setEditUser(null);
       setSelectedUser(null);
+      setUpdateError(null);
       loadUsers(userPage);
     } catch (err) {
-      console.error("Update failed", err);
+      const data = err.response?.data;
+      if (data?.message && (data?.details || data?.errorCode)) {
+        setUpdateError({
+          message: data.message,
+          details: data.details,
+        });
+      } else {
+        setUpdateError({
+          message: typeof data === "string" ? data : data?.message || "Update failed",
+        });
+      }
     }
   };
 
@@ -158,24 +197,42 @@ const AdminDashboard = ({ keycloak }) => {
               <h3>Create User</h3>
               <form className="admin-form" onSubmit={registerUser}>
                 <input
-                  placeholder="Name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  required
-                />
-                <input
-                  placeholder="Email"
+                  type="email"
+                  placeholder="Email *"
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                   required
                 />
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder="Password (min 8 characters) *"
                   value={newUser.password}
                   onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  minLength={8}
                   required
                 />
+                <input
+                  placeholder="First name"
+                  value={newUser.firstName}
+                  onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                />
+                <input
+                  placeholder="Last name"
+                  value={newUser.lastName}
+                  onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                />
+                {registerError && (
+                  <div className="form-error">
+                    <p>{registerError.message}</p>
+                    {registerError.details && (
+                      <ul>
+                        {Object.entries(registerError.details).map(([field, msg]) => (
+                          <li key={field}>{field}: {msg}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 <button className="btn btn-primary">Register</button>
               </form>
 
@@ -222,11 +279,11 @@ const AdminDashboard = ({ keycloak }) => {
                 <tbody>
                   {users.length ? (
                     users.map((u) => (
-                      <tr key={u.id} onClick={() => setSelectedUser(u)} style={{ cursor: "pointer" }}>
+                      <tr key={u.id ?? u.keycloakId} onClick={() => setSelectedUser(u)} style={{ cursor: "pointer" }}>
                         <td>{u.id}</td>
-                        <td>{u.name}</td>
+                        <td>{u.name ?? ([u.firstName, u.lastName].filter(Boolean).join(" ") || "—")}</td>
                         <td>{u.email}</td>
-                        <td>{u.role}</td>
+                        <td>{Array.isArray(u.role) ? u.role.join(", ") : u.role}</td>
                       </tr>
                     ))
                   ) : (
@@ -319,8 +376,8 @@ const AdminDashboard = ({ keycloak }) => {
                 <tbody>
                   {attendance.length ? (
                     attendance.map((a) => (
-                      <tr key={`${a.userId}-${a.date}`}>
-                        <td>{a.userId}</td>
+                      <tr key={`${a.keycloakId ?? a.email}-${a.date}`}>
+                        <td>{a.keycloakId ?? a.email}</td>
                         <td>{a.email}</td>
                         <td>{new Date(a.date).toLocaleDateString()}</td>
                         <td
@@ -396,19 +453,34 @@ const AdminDashboard = ({ keycloak }) => {
             {editUser && editUser.id === selectedUser.id ? (
               <form className="admin-form" onSubmit={updateUser}>
                 <input
-                  value={editUser.name}
+                  placeholder="Name *"
+                  value={editUser.name ?? ""}
                   onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
                   required
                 />
                 <input
                   type="password"
-                  placeholder="New Password"
-                  value={editUser.password || ""}
+                  placeholder="Password (min 4 characters) *"
+                  value={editUser.password ?? ""}
                   onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+                  minLength={4}
+                  required
                 />
+                {updateError && (
+                  <div className="form-error">
+                    <p>{updateError.message}</p>
+                    {updateError.details && (
+                      <ul>
+                        {Object.entries(updateError.details).map(([field, msg]) => (
+                          <li key={field}>{field}: {msg}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: "10px" }}>
                   <button className="btn btn-primary">Update</button>
-                  <button type="button" className="btn btn-secondary" onClick={() => setEditUser(null)}>Cancel</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setEditUser(null); setUpdateError(null); }}>Cancel</button>
                 </div>
               </form>
             ) : (

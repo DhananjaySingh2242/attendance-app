@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: attendance-app
-          image: dhananjaysingh/attendance-app:1.0
+          image: dhananjaysingh2242/attendance-app:1.0
           imagePullPolicy: IfNotPresent   # use Never when image is loaded locally (e.g. kind load / minikube)
           ports:
             - containerPort: 8081

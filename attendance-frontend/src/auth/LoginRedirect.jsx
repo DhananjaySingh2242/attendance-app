@@ -16,7 +16,7 @@ const LoginRedirect = ({ keycloak }) => {
     } else if (AuthService.isUser(keycloak)) {
       navigate("/dashboard", { replace: true });
     } else {
-      navigate("/unauthorized", { replace: true });
+      keycloak.logout({ redirectUri: window.location.origin });
     }
   }, [keycloak, navigate]);
 

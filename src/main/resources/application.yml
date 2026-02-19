@@ -1,101 +1,61 @@
+# Base config. Override with profiles (local, prod) or env vars. Never commit real secrets.
+
 server:
-  port: 8081
-
-# spring:
-#   application:
-#     name: attendenceApp
-
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-#     username: root
-#     password: Ansh@123
-#     driver-class-name: com.mysql.cj.jdbc.Driver
-
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-#     open-in-view: false
-#     properties:
-#       hibernate:
-#         format_sql: true
-
-
-#   data:
-#     mongodb:
-#       host: localhost
-#       port: 27017
-#       database: attendance
-#       repositories:
-#         enabled: true
-
-#     redis:
-#       host: localhost
-#       port: 6379
-#       repositories:
-#         enabled: false
-
-#   rabbitmq:
-#     host: localhost
-#     port: 5672
-#     username: guest
-#     password: guest
-
-#   security:
-#     oauth2:
-#       resourceserver:
-#         jwt:
-#           issuer-uri: http://localhost:8080/realms/keycloak-demo
-
-# logging:
-#   level:
-#     root: INFO
-#     org:
-#       springframework:
-#         security: DEBUG
-#         security.oauth2: DEBUG
-
-# keycloak:
-#   auth-server-url: http://localhost:8080
-#   realm: keycloak-demo
-#   admin:
-#     client-id: attendance-admin-client
-#     client-secret: IYHbzch2E3Dxpl6oe10SW0Oben5KD4Mf
+  port: ${SERVER_PORT:8081}
 
 spring:
+  application:
+    name: attendance-app
   datasource:
-    url: jdbc:mysql://mysql:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: attendance
-    password: Ansh@123
-    hikari:
-      connection-timeout: 60000
-      initialization-fail-timeout: 120000
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:attendance}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
     hibernate:
-      ddl-auto: update
-
+      ddl-auto: ${JPA_DDL_AUTO:update}
   data:
     mongodb:
-      host: mongodb
-      port: 27017
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
       database: attendance
-
     redis:
-      host: redis
-      port: 6379
-
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/keycloak-demo
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/keycloak-demo}
 
+# JWT issuer and Keycloak - set KEYCLOAK_* and KEYCLOAK_REALM in prod
 keycloak:
-  auth-server-url: http://keycloak:8080
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:keycloak-demo}
+  admin:
+    realm: ${KEYCLOAK_ADMIN_REALM:master}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+
+# CORS: allow origins (comma-separated). Production should set to specific front-end URLs.
+app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+
+# Actuator: health and info. In prod, set management.endpoints.web.exposure.include=health,info
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

@@ -1,0 +1,33 @@
+# Profile for Docker/Compose (hostnames: mysql, mongodb, redis, rabbitmq, keycloak).
+# Use: spring.profiles.active=docker (or set in env).
+
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/attendance?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:attendance}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 60000
+      initialization-fail-timeout: 120000
+  jpa:
+    hibernate:
+      ddl-auto: update
+  data:
+    mongodb:
+      host: ${MONGODB_HOST:mongodb}
+      port: ${MONGODB_PORT:27017}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/keycloak-demo}
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:keycloak-demo}
+  admin:
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:attendance-admin-client}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}

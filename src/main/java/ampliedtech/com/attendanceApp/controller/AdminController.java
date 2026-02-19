@@ -1,0 +1,97 @@
+package ampliedtech.com.attendanceApp.controller;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import ampliedtech.com.attendanceApp.requestDto.RegisterRequest;
+import ampliedtech.com.attendanceApp.requestDto.UpdateRequest;
+import ampliedtech.com.attendanceApp.responseDto.AttendanceResponse;
+import ampliedtech.com.attendanceApp.responseDto.DeleteResponse;
+import ampliedtech.com.attendanceApp.responseDto.UpdateResponse;
+import ampliedtech.com.attendanceApp.responseDto.UserResponse;
+import ampliedtech.com.attendanceApp.service.KeycloakUserService;
+import ampliedtech.com.attendanceApp.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+
+@RestController
+@RequestMapping("/api/admin")
+public class AdminController {
+    private final UserService userService;
+    private final KeycloakUserService keycloakUserService;
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
+
+    public AdminController(UserService userService, KeycloakUserService keycloakUserService) {
+        this.userService = userService;
+        this.keycloakUserService = keycloakUserService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        log.debug("Register request for email: {}", request != null ? request.getEmail() : null);
+        keycloakUserService.registerUser(request);
+        return ResponseEntity.ok("User registered successfully");
+    }
+
+    @GetMapping("/all-users")
+    public ResponseEntity<Page<UserResponse>> getAllUser(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Positive @Max(value = 100, message = "Size must not exceed 100") int size) {
+        log.info("Fetching all users - Page: {}, Size: {}", page, size);
+        Page<UserResponse> dtoPage = userService.getAllUser(page, size);
+        return ResponseEntity.ok(dtoPage);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public DeleteResponse deleteUser(
+            @PathVariable @Positive(message = "User id must be greater than 0") Long id) {
+        log.warn("Delete user API called for userId: {}", id);
+        return userService.deleteUser(id);
+    }
+
+    @PatchMapping("/update/{id}")
+    public UpdateResponse updateUser(
+            @PathVariable @Positive(message = "User id must be greater than 0") Long id,
+            @Valid @RequestBody UpdateRequest request) {
+
+        log.info("Update user API called for userId: {}", id);
+        return userService.updateUser(id, request);
+    }
+
+    @GetMapping("/all-attendance")
+    public ResponseEntity<Page<AttendanceResponse>> getAttendance(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Positive @Max(value = 100, message = "Size must not exceed 100") int size) {
+        log.info("Fetching all attendance - Page: {}, Size: {}", page, size);
+        Page<AttendanceResponse> response = userService.getAttendance(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/search")
+    public List<UserResponse> searchUsers(@RequestParam String keyword) {
+        return userService.searchUsers(keyword);
+    }
+
+    @GetMapping("/attendance/search")
+    public List<AttendanceResponse> getUserAttendance(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return userService.getUserAttendance(date);
+    }
+}
