@@ -18,12 +18,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - --spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-            - --keycloak.auth-server-url={{ .Values.keycloak.authServerUrl | quote }}
-            - --keycloak.realm={{ .Values.keycloak.realm | quote }}
-            - --keycloak.admin.client-id={{ .Values.keycloak.admin.clientId | quote }}
-            - --keycloak.admin.client-secret={{ .Values.keycloak.admin.clientSecret | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -46,22 +40,39 @@ spec:
               value: {{ .Values.keycloak.realm | quote }}
             - name: KEYCLOAK_ADMIN_CLIENT_ID
               value: {{ .Values.keycloak.admin.clientId | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.existingSecret.name | default "keycloak-secret" }}
+                  key: {{ .Values.keycloak.existingSecret.adminPasswordKey | default "admin-password" }}
             - name: KEYCLOAK_ADMIN_CLIENT_SECRET
-              value: {{ .Values.keycloak.admin.clientSecret | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.existingSecret.name | default "keycloak-secret" }}
+                  key: {{ .Values.keycloak.existingSecret.clientSecretKey | default "client-secret" }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- if .Values.probes.startup }}
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.probes.startup.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ .Values.probes.startup.periodSeconds | default 10 }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold | default 18 }}
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /api/health
               port: {{ .Values.service.port }}
-            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds | default 50 }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds | default 10 }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds | default 10 }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold | default 6 }}
           livenessProbe:
             httpGet:
               path: /api/health
               port: {{ .Values.service.port }}
-            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds | default 70 }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds | default 60 }}
             periodSeconds: {{ .Values.probes.liveness.periodSeconds | default 15 }}
-            failureThreshold: {{ .Values.probes.liveness.failureThreshold | default 3 }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold | default 6 }}
