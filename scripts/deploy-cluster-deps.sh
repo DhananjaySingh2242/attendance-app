@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Deploy dependencies required by attendance-app in the cluster (default namespace).
 # Run from project root: ./scripts/deploy-cluster-deps.sh
-# Required for app to start: MySQL, MongoDB, Keycloak. Optional: Redis, RabbitMQ.
+#
+# For full one-command deploy (deps + app + secrets), use: ./scripts/run-kubernetes.sh
 set -e
 cd "$(dirname "$0")/.."
 echo "==> Deploying MySQL, MongoDB, Keycloak (required)..."

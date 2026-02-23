@@ -1,8 +1,9 @@
 import axios from "axios";
 import keycloak from "../keycloak";
 
+// Empty baseURL when served from same host (e.g. minikube service); set VITE_API_BASE_URL for local dev proxy
 const api = axios.create({
-  baseURL: "http://localhost:8081",
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
 });
 
 api.interceptors.request.use(

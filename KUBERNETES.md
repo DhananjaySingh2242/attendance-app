@@ -31,21 +31,30 @@ This will:
 
 - Create required secrets (`db-secret`, `keycloak-secret`)
 - Deploy MySQL, MongoDB, Redis, RabbitMQ, Keycloak
-- Build the app JAR and Docker image
-- Load the image into Minikube (or push to Docker Hub for remote clusters)
+- Build the **full app** (frontend + backend in one image) and load into Minikube
 - Deploy the attendance-app
 
-### 3. Access the app
+### 3. Run the whole project (one command)
 
 ```bash
-minikube service attendance-app --url
+minikube service attendance-app
 ```
 
-Then open the URL in a browser (add `/api/health` to verify). Or use port-forward:
+This opens the **full app** (UI + API) in your browser from one URL. The same deployment serves the React frontend and the Spring Boot API.
+
+**For login to work**, Keycloak must be reachable at `http://localhost:8080`. In another terminal run:
 
 ```bash
-kubectl port-forward svc/attendance-app 8081:8081
-# Open http://localhost:8081/api/health
+kubectl port-forward svc/keycloak 8080:8080
+```
+
+Then refresh the app page and sign in. (In Keycloak, add your minikube app URL to **attendance-client** Valid redirect URIs, e.g. `http://192.168.49.2:30007/*` or the URL that `minikube service attendance-app --url` prints.)
+
+Other ways to access:
+
+```bash
+minikube service attendance-app --url   # print URL only
+kubectl port-forward svc/attendance-app 8081:8081   # then open http://localhost:8081
 ```
 
 ---
@@ -70,7 +79,7 @@ If the image `dhananjaysingh2242/attendance-app:1.0` is already on Docker Hub or
 2. Open **http://localhost:8080** → Admin console (admin / admin)
 
 3. Create realm **keycloak-demo** and clients:
-   - **attendance-client** (public) – Valid redirect URIs: `http://localhost:5173/*`
+   - **attendance-client** (public) – Valid redirect URIs: `http://localhost:5173/*` (local dev) and your minikube URL, e.g. `http://192.168.49.2:30007/*` (get it from `minikube service attendance-app --url`)
    - **attendance-admin-client** (confidential) – copy the **Secret** from Credentials tab
 
 4. Create roles **ADMIN** and **USER**; set USER as default realm role

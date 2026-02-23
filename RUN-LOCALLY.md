@@ -1,5 +1,7 @@
 # Run Attendance App Locally
 
+> **Kubernetes?** See [KUBERNETES.md](KUBERNETES.md) for one-command deploy (`./scripts/run-kubernetes.sh --build-image`).
+
 ## Prerequisites
 
 - **Java 21** and **Maven**
